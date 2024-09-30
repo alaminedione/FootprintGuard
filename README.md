@@ -1,1 +1,1 @@
-# FootprintGuard
+# FingerprintGuard
