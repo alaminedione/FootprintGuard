@@ -1,0 +1,553 @@
+{
+    "manifest_version": 3,
+    "name": "FingerprintGuard",
+    "version": "1.0.0",
+    "description": "Protection contre le fingerprinting des navigateurs",
+    "permissions": [
+        "storage",
+        "scripting",
+        "declarativeNetRequest",
+        "declarativeNetRequestWithHostAccess",
+        "contentSettings",
+        "webNavigation",
+        "tabs"
+    ],
+    "host_permissions": [
+        "<all_urls>"
+    ],
+    "action": {
+        "default_popup": "popup.html",
+        "default_icon": {
+            "16": "icons/icon16.png",
+            "48": "icons/icon48.png",
+            "128": "icons/icon128.png"
+        }
+    },
+    "options_ui": {
+        "page": "settings.html",
+        "open_in_tab": true
+    },
+    "background": {
+        "service_worker": "background.js"
+    },
+    "declarative_net_request": {
+        "rule_resources": [
+            {
+                "id": "1",
+                "enabled": false,
+                "path": "./rules/ruleset_1.json"
+            },
+            {
+                "id": "2",
+                "enabled": false,
+                "path": "./rules/ruleset_2.json"
+            },
+            {
+                "id": "3",
+                "enabled": false,
+                "path": "./rules/ruleset_3.json"
+            },
+            {
+                "id": "4",
+                "enabled": false,
+                "path": "./rules/ruleset_4.json"
+            },
+            {
+                "id": "5",
+                "enabled": false,
+                "path": "./rules/ruleset_5.json"
+            },
+            {
+                "id": "6",
+                "enabled": false,
+                "path": "./rules/ruleset_6.json"
+            },
+            {
+                "id": "7",
+                "enabled": false,
+                "path": "./rules/ruleset_7.json"
+            },
+            {
+                "id": "8",
+                "enabled": false,
+                "path": "./rules/ruleset_8.json"
+            },
+            {
+                "id": "9",
+                "enabled": false,
+                "path": "./rules/ruleset_9.json"
+            },
+            {
+                "id": "10",
+                "enabled": false,
+                "path": "./rules/ruleset_10.json"
+            },
+            {
+                "id": "11",
+                "enabled": false,
+                "path": "./rules/ruleset_11.json"
+            },
+            {
+                "id": "12",
+                "enabled": false,
+                "path": "./rules/ruleset_12.json"
+            },
+            {
+                "id": "13",
+                "enabled": false,
+                "path": "./rules/ruleset_13.json"
+            },
+            {
+                "id": "14",
+                "enabled": false,
+                "path": "./rules/ruleset_14.json"
+            },
+            {
+                "id": "15",
+                "enabled": false,
+                "path": "./rules/ruleset_15.json"
+            },
+            {
+                "id": "16",
+                "enabled": false,
+                "path": "./rules/ruleset_16.json"
+            },
+            {
+                "id": "17",
+                "enabled": false,
+                "path": "./rules/ruleset_17.json"
+            },
+            {
+                "id": "18",
+                "enabled": false,
+                "path": "./rules/ruleset_18.json"
+            },
+            {
+                "id": "19",
+                "enabled": false,
+                "path": "./rules/ruleset_19.json"
+            },
+            {
+                "id": "20",
+                "enabled": false,
+                "path": "./rules/ruleset_20.json"
+            },
+            {
+                "id": "21",
+                "enabled": false,
+                "path": "./rules/ruleset_21.json"
+            },
+            {
+                "id": "22",
+                "enabled": false,
+                "path": "./rules/ruleset_22.json"
+            },
+            {
+                "id": "23",
+                "enabled": false,
+                "path": "./rules/ruleset_23.json"
+            },
+            {
+                "id": "24",
+                "enabled": false,
+                "path": "./rules/ruleset_24.json"
+            },
+            {
+                "id": "25",
+                "enabled": false,
+                "path": "./rules/ruleset_25.json"
+            },
+            {
+                "id": "26",
+                "enabled": false,
+                "path": "./rules/ruleset_26.json"
+            },
+            {
+                "id": "27",
+                "enabled": false,
+                "path": "./rules/ruleset_27.json"
+            },
+            {
+                "id": "28",
+                "enabled": false,
+                "path": "./rules/ruleset_28.json"
+            },
+            {
+                "id": "29",
+                "enabled": false,
+                "path": "./rules/ruleset_29.json"
+            },
+            {
+                "id": "30",
+                "enabled": false,
+                "path": "./rules/ruleset_30.json"
+            },
+            {
+                "id": "31",
+                "enabled": false,
+                "path": "./rules/ruleset_31.json"
+            },
+            {
+                "id": "32",
+                "enabled": false,
+                "path": "./rules/ruleset_32.json"
+            },
+            {
+                "id": "33",
+                "enabled": false,
+                "path": "./rules/ruleset_33.json"
+            },
+            {
+                "id": "34",
+                "enabled": false,
+                "path": "./rules/ruleset_34.json"
+            },
+            {
+                "id": "35",
+                "enabled": false,
+                "path": "./rules/ruleset_35.json"
+            },
+            {
+                "id": "36",
+                "enabled": false,
+                "path": "./rules/ruleset_36.json"
+            },
+            {
+                "id": "37",
+                "enabled": false,
+                "path": "./rules/ruleset_37.json"
+            },
+            {
+                "id": "38",
+                "enabled": false,
+                "path": "./rules/ruleset_38.json"
+            },
+            {
+                "id": "39",
+                "enabled": false,
+                "path": "./rules/ruleset_39.json"
+            },
+            {
+                "id": "40",
+                "enabled": false,
+                "path": "./rules/ruleset_40.json"
+            },
+            {
+                "id": "41",
+                "enabled": false,
+                "path": "./rules/ruleset_41.json"
+            },
+            {
+                "id": "42",
+                "enabled": false,
+                "path": "./rules/ruleset_42.json"
+            },
+            {
+                "id": "43",
+                "enabled": false,
+                "path": "./rules/ruleset_43.json"
+            },
+            {
+                "id": "44",
+                "enabled": false,
+                "path": "./rules/ruleset_44.json"
+            },
+            {
+                "id": "45",
+                "enabled": false,
+                "path": "./rules/ruleset_45.json"
+            },
+            {
+                "id": "46",
+                "enabled": false,
+                "path": "./rules/ruleset_46.json"
+            },
+            {
+                "id": "47",
+                "enabled": false,
+                "path": "./rules/ruleset_47.json"
+            },
+            {
+                "id": "48",
+                "enabled": false,
+                "path": "./rules/ruleset_48.json"
+            },
+            {
+                "id": "49",
+                "enabled": false,
+                "path": "./rules/ruleset_49.json"
+            },
+            {
+                "id": "50",
+                "enabled": false,
+                "path": "./rules/ruleset_50.json"
+            },
+            {
+                "id": "51",
+                "enabled": false,
+                "path": "./rules/ruleset_51.json"
+            },
+            {
+                "id": "52",
+                "enabled": false,
+                "path": "./rules/ruleset_52.json"
+            },
+            {
+                "id": "53",
+                "enabled": false,
+                "path": "./rules/ruleset_53.json"
+            },
+            {
+                "id": "54",
+                "enabled": false,
+                "path": "./rules/ruleset_54.json"
+            },
+            {
+                "id": "55",
+                "enabled": false,
+                "path": "./rules/ruleset_55.json"
+            },
+            {
+                "id": "56",
+                "enabled": false,
+                "path": "./rules/ruleset_56.json"
+            },
+            {
+                "id": "57",
+                "enabled": false,
+                "path": "./rules/ruleset_57.json"
+            },
+            {
+                "id": "58",
+                "enabled": false,
+                "path": "./rules/ruleset_58.json"
+            },
+            {
+                "id": "59",
+                "enabled": false,
+                "path": "./rules/ruleset_59.json"
+            },
+            {
+                "id": "60",
+                "enabled": false,
+                "path": "./rules/ruleset_60.json"
+            },
+            {
+                "id": "61",
+                "enabled": false,
+                "path": "./rules/ruleset_61.json"
+            },
+            {
+                "id": "62",
+                "enabled": false,
+                "path": "./rules/ruleset_62.json"
+            },
+            {
+                "id": "63",
+                "enabled": false,
+                "path": "./rules/ruleset_63.json"
+            },
+            {
+                "id": "64",
+                "enabled": false,
+                "path": "./rules/ruleset_64.json"
+            },
+            {
+                "id": "65",
+                "enabled": false,
+                "path": "./rules/ruleset_65.json"
+            },
+            {
+                "id": "66",
+                "enabled": false,
+                "path": "./rules/ruleset_66.json"
+            },
+            {
+                "id": "67",
+                "enabled": false,
+                "path": "./rules/ruleset_67.json"
+            },
+            {
+                "id": "68",
+                "enabled": false,
+                "path": "./rules/ruleset_68.json"
+            },
+            {
+                "id": "69",
+                "enabled": false,
+                "path": "./rules/ruleset_69.json"
+            },
+            {
+                "id": "70",
+                "enabled": false,
+                "path": "./rules/ruleset_70.json"
+            },
+            {
+                "id": "71",
+                "enabled": false,
+                "path": "./rules/ruleset_71.json"
+            },
+            {
+                "id": "72",
+                "enabled": false,
+                "path": "./rules/ruleset_72.json"
+            },
+            {
+                "id": "73",
+                "enabled": false,
+                "path": "./rules/ruleset_73.json"
+            },
+            {
+                "id": "74",
+                "enabled": false,
+                "path": "./rules/ruleset_74.json"
+            },
+            {
+                "id": "75",
+                "enabled": false,
+                "path": "./rules/ruleset_75.json"
+            },
+            {
+                "id": "76",
+                "enabled": false,
+                "path": "./rules/ruleset_76.json"
+            },
+            {
+                "id": "77",
+                "enabled": false,
+                "path": "./rules/ruleset_77.json"
+            },
+            {
+                "id": "78",
+                "enabled": false,
+                "path": "./rules/ruleset_78.json"
+            },
+            {
+                "id": "79",
+                "enabled": false,
+                "path": "./rules/ruleset_79.json"
+            },
+            {
+                "id": "80",
+                "enabled": false,
+                "path": "./rules/ruleset_80.json"
+            },
+            {
+                "id": "81",
+                "enabled": false,
+                "path": "./rules/ruleset_81.json"
+            },
+            {
+                "id": "82",
+                "enabled": false,
+                "path": "./rules/ruleset_82.json"
+            },
+            {
+                "id": "83",
+                "enabled": false,
+                "path": "./rules/ruleset_83.json"
+            },
+            {
+                "id": "84",
+                "enabled": false,
+                "path": "./rules/ruleset_84.json"
+            },
+            {
+                "id": "85",
+                "enabled": false,
+                "path": "./rules/ruleset_85.json"
+            },
+            {
+                "id": "86",
+                "enabled": false,
+                "path": "./rules/ruleset_86.json"
+            },
+            {
+                "id": "87",
+                "enabled": false,
+                "path": "./rules/ruleset_87.json"
+            },
+            {
+                "id": "88",
+                "enabled": false,
+                "path": "./rules/ruleset_88.json"
+            },
+            {
+                "id": "89",
+                "enabled": false,
+                "path": "./rules/ruleset_89.json"
+            },
+            {
+                "id": "90",
+                "enabled": false,
+                "path": "./rules/ruleset_90.json"
+            },
+            {
+                "id": "91",
+                "enabled": false,
+                "path": "./rules/ruleset_91.json"
+            },
+            {
+                "id": "92",
+                "enabled": false,
+                "path": "./rules/ruleset_92.json"
+            },
+            {
+                "id": "93",
+                "enabled": false,
+                "path": "./rules/ruleset_93.json"
+            },
+            {
+                "id": "94",
+                "enabled": false,
+                "path": "./rules/ruleset_94.json"
+            },
+            {
+                "id": "95",
+                "enabled": false,
+                "path": "./rules/ruleset_95.json"
+            },
+            {
+                "id": "96",
+                "enabled": false,
+                "path": "./rules/ruleset_96.json"
+            },
+            {
+                "id": "97",
+                "enabled": false,
+                "path": "./rules/ruleset_97.json"
+            },
+            {
+                "id": "98",
+                "enabled": false,
+                "path": "./rules/ruleset_98.json"
+            },
+            {
+                "id": "99",
+                "enabled": false,
+                "path": "./rules/ruleset_99.json"
+            },
+            {
+                "id": "100",
+                "enabled": false,
+                "path": "./rules/ruleset_100.json"
+            }
+        ]
+    },
+    "icons": {
+        "16": "icons/icon16.png",
+        "48": "icons/icon48.png",
+        "128": "icons/icon128.png"
+    },
+    "web_accessible_resources": [
+        {
+            "resources": [
+                "./spoofer/spoof-canvas.js"
+            ],
+            "matches": [
+                "<all_urls>"
+            ],
+            "use_dynamic_url": true
+        }
+    ]
+}

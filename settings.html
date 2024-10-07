@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="fr">
+
+<head>
+  <meta charset="UTF-8" />
+  <title>Paramètres - FingerprintGuard</title>
+  <link rel="stylesheet" href="./css/settings.css" />
+</head>
+
+<body>
+  <header class="header">
+    <h1>Paramètres</h1>
+  </header>
+
+  <main>
+    <section class="settings-section">
+      <h2>Comportement de l'extension</h2>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <div class="setting-title">
+            Recharger automatiquement tous les onglets
+          </div>
+          <div class="setting-description">
+            Recharge automatiquement tous les onglets lorsqu'un paramètre de
+            protection est modifié
+          </div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="autoReloadAll" />
+          <span class="slider"></span>
+        </label>
+      </div>
+
+      <div class="setting-item">
+        <div class="setting-info">
+          <div class="setting-title">Recharger l'onglet actif</div>
+          <div class="setting-description">
+            Recharge uniquement l'onglet actif lorsqu'un paramètre est modifié
+          </div>
+        </div>
+        <label class="switch">
+          <input type="checkbox" id="autoReloadCurrent" />
+          <span class="slider"></span>
+        </label>
+      </div>
+    </section>
+
+    <button class="save-button" id="saveButton">
+      Enregistrer les modifications
+    </button>
+    <div id="saveStatus"></div>
+  </main>
+  <script src="settings.js"></script>
+</body>
+
+</html>

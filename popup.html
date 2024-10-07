@@ -1,0 +1,156 @@
+<!doctype html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>FingerprintGuard</title>
+    <link rel="stylesheet" href="./css/popup.css" />
+  </head>
+
+  <body>
+    <div id="loading">
+      <div class="loading-spinner"></div>
+    </div>
+
+    <div class="container">
+      <div class="header">
+        <h1>FingerprintGuard</h1>
+        <button
+          id="openSettings"
+          class="settings-button"
+          title="Paramètres avancés"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z"
+            />
+            <circle cx="12" cy="12" r="3" />
+          </svg>
+        </button>
+      </div>
+      <div id="settings">
+        <div class="item">
+          <div>
+            <span class="item-label">
+              Usurpation du navigateur
+              <div class="tooltip">
+                ?
+                <span class="tooltip-text"
+                  >Modifie les informations du navigateur pour empêcher
+                  l'identification</span
+                >
+              </div>
+            </span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="spoofNavigator" />
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="item">
+          <div>
+            <span class="item-label">
+              Usurpation du user agent
+              <div class="tooltip">
+                ?
+                <span class="tooltip-text"
+                  >Change l'identité du navigateur envoyée aux sites web</span
+                >
+              </div>
+            </span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="spoofUserAgent" />
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="item">
+          <div>
+            <span class="item-label">
+              Usurpation du canvas
+              <div class="tooltip">
+                ?
+                <span class="tooltip-text"
+                  >Modifie légèrement le rendu canvas pour éviter le
+                  fingerprinting</span
+                >
+              </div>
+            </span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="spoofCanvas" />
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="item">
+          <div>
+            <span class="item-label">
+              Blocage des images
+              <div class="tooltip">
+                ?
+                <span class="tooltip-text"
+                  >Bloque le chargement des images
+                </span>
+              </div>
+            </span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="blockImages" />
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="item">
+          <div>
+            <span class="item-label">
+              Blocage de JavaScript
+              <div class="tooltip">
+                ?
+                <span class="tooltip-text">Désactive JavaScript </span>
+              </div>
+            </span>
+          </div>
+          <label class="switch">
+            <input type="checkbox" id="blockJS" />
+            <span class="slider"></span>
+          </label>
+        </div>
+      </div>
+
+      <div id="status" class="status">
+        <span id="statusText">Chargement...</span>
+      </div>
+    </div>
+
+    <!-- boutton pour recharger tous les pages -->
+    <button id="reloadAllTabs" class="reload-button">
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        fill="none"
+        viewBox="0 0 24 24"
+        stroke="currentColor"
+      >
+        <path
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="2"
+          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+        />
+      </svg>
+      Recharger toutes les pages
+    </button>
+    <script src="popup.js"></script>
+  </body>
+</html>
