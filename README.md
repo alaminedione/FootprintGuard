@@ -1,6 +1,6 @@
 # Fingerprint Guard
 
-Cette extension Chrome permet de protéger la vie privée des utilisateurs en usurpant certaines informations du navigateur et en bloquant des éléments spécifiques sur les pages web. Elle est conçue pour aider à réduire le fingerprinting, une technique utilisée par les sites web pour suivre les utilisateurs.
+Fingerprint Guard est une extension conçue pour protéger la vie privée des utilisateurs en usurpant certaines informations du navigateur . Elle vise à contrer les techniques de fingerprinting utilisées par les sites web pour suivre les utilisateurs.
 
 ## Fonctionnalités
 

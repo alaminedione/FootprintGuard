@@ -1,7 +1,7 @@
 {
   "name": "fingerprintguard",
-  "version": "1.0.0",
-  "description": "une extension web qui te permet de proteger contre le fingerprinting",
+  "version": "2.0.0",
+  "description": "protege la vie privée des utilisateurs en usurpant certaines informations du navigateur",
   "main": "./popup.js",
   "type": "module",
   "scripts": {
@@ -9,10 +9,16 @@
     "build": "webpack"
   },
   "keywords": [
-    "fingerprintnit",
-    "privacity"
+    "fingerprinting",
+    "browser",
+    "extension",
+    "privacity",
+    "security",
+    "anti-fingerprinting",
+    "anonymity",
+    "FingerprintGuard"
   ],
-  "author": "alamine",
+  "author": "alaminedione",
   "license": "MIT",
   "devDependencies": {
     "@types/chrome": "^0.0.273"

@@ -23,30 +23,18 @@ const defaultSettings = {
   uaBitness: 'random',
   uaWow64: 'random',
   uaModel: 'random',
-  uaFullVersion: 'random'
+  uaFullVersion: 'random',
+  //
+  browser: 'random',
+  secChUa: 'random',
+  secChUaMobile: 'random',
+  secChUaPlatform: 'random',
+  secChUaFullVersion: 'random',
+  secChUaPlatformVersion: 'random',
+  hDeviceMemory: 'random',
+  referer: '',
+  contentEncoding: 'random'
 };
-
-const navigatorFields = {
-  platform: 'random',
-  language: 'random',
-  hardwareConcurrency: 4,
-  deviceMemory: 8,
-  minVersion: 110,
-  maxVersion: 120
-}
-
-//maximum de règles pour le l'usurpation du header
-const maxRuleset = 100;
-
-// tenter de désactiver tous les rulesets
-try {
-  chrome.declarativeNetRequest.updateEnabledRulesets({
-    disableRulesetIds: Array.from({ length: maxRuleset }, (_, i) => `${i + 1}`)
-    // disableRulesetIds: [activeRuleset]
-  }).then(console.log('Tous les rulesets ont été désactivés')).catch(console.error);
-} catch (error) {
-  console.error('Erreur lors de la tentative de désactivation de tous les rulesets:', error);
-}
 
 //initialisation des paramètres depuis le storage
 let settings = { ...defaultSettings };
@@ -54,7 +42,7 @@ chrome.storage.sync.get(settings, (stored) => {
   settings = { ...defaultSettings, ...stored };
 });
 
-//écoute des changements de paramètres et a jour les regles
+//écoute des changements de paramètres et mettre a jour les regles
 chrome.storage.onChanged.addListener((changes) => {
   for (let [key, { newValue }] of Object.entries(changes)) {
     settings[key] = newValue;
@@ -68,11 +56,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.type === 'getStatus') {
     //retourne les paramètres actuels
     sendResponse(settings);
-    return true;
+    // return true;
   } else if (message.type === 'updateSetting') {
     //met à jour le parametre
     chrome.storage.sync.set({ [message.setting]: message.value });
-    return true;
+    // return true;
   }
 });
 
@@ -84,14 +72,17 @@ chrome.webNavigation.onCommitted.addListener((details) => {
   } else {
 
     //usurper le canvas
-    //TODO: ca ne fonctionne pas
     if (settings.spoofCanvas) {
       chrome.scripting.executeScript({
         target: { tabId: details.tabId },
         files: ['./spoofer/spoof-canvas.js'],
         injectImmediately: true,
         world: 'MAIN'
-      }).catch(console.error);
+      }).then((result) => {
+        console.log('Script injecté dans le canvas:', result);
+      }).catch((error) => {
+        console.error('Erreur lors de l\'injection du script:', error);
+      });
     }
 
     //usurper le Navigator
@@ -102,44 +93,65 @@ chrome.webNavigation.onCommitted.addListener((details) => {
         world: 'MAIN',
         func: applySpoofingNavigator,
         args: [settings]
-      }).catch(console.error);
+      }).then((result) => {
+        console.log('Script injecté dans le Navigator:', result);
+      }).catch((error) => {
+        console.error('Erreur lors de l\'injection du script:', error);
+      });
       chrome.scripting.executeScript({
         target: { tabId: details.tabId },
         injectImmediately: true,
         world: 'MAIN',
         func: applyUserAgentDataSpoofing,
         args: [settings]
-      })
+      }).then((result) => {
+        console.log('Script injecté dans userAgentData:', result);
+      }).catch((error) => {
+        console.error('Erreur lors de l\'injection du script:', error);
+      });
     }
 
     //usurper le UserAgent
     if (settings.spoofUserAgent) {
-      const newRuleset = generateRandomRuleset(maxRuleset);
-
-      chrome.declarativeNetRequest.updateEnabledRulesets({
-        enableRulesetIds: [newRuleset],
-        // disableRulesetIds: [newRuleset] //pour éviter les duplications
-      }).catch(console.error);
-      console.log(`Activation du nouveau ruleset: ${newRuleset}`);
+      const newRule = getNewRules(settings);
+      chrome.declarativeNetRequest.updateDynamicRules({
+        removeRuleIds: [1], //eviter la duplication
+        addRules: newRule
+      }).then((result) => {
+        console.log('Règle modifiée:', result);
+      }).catch((error) => {
+        console.error('Erreur lors de la modification de la règle:', error);
+      });
+      console.log(`Activation du nouveau regle: ${newRule.id}`);
       if (!settings.spoofNavigator) {
+        console.log("Spoof the navigator user agent niveau javascript");
         chrome.scripting.executeScript({
           target: { tabId: details.tabId },
-          files: ['./spoofer/spoof-user-agent.js'],
           injectImmediately: true,
-          world: 'MAIN'
-        }).catch(console.error);
+          world: 'MAIN',
+          func: applyUserAgentDataSpoofing,
+          args: [settings]
+        }).then((result) => {
+          console.log('Script injecté dans userAgentData:', result);
+        }).catch((error) => {
+          console.error('Erreur lors de l\'injection du script:', error);
+        });
+        chrome.scripting.executeScript({
+          target: { tabId: details.tabId },
+          injectImmediately: true,
+          world: 'MAIN',
+          func: modifyUserAgent,
+          args: [settings]
+        }).then((result) => {
+          console.log('Script injecté dans userAgent:', result);
+        }).catch((error) => {
+          console.error('Erreur lors de l\'injection du script:', error);
+        });
       }
-      // }
     } else {
-      // tenter de désactiver tous les rulesets
-      try {
-        chrome.declarativeNetRequest.updateEnabledRulesets({
-          disableRulesetIds: Array.from({ length: maxRuleset }, (_, i) => `${i + 1}`)
-          // disableRulesetIds: [activeRuleset]
-        }).then(console.log('Tous les rulesets ont été désactivés')).catch(console.error);
-      } catch (error) {
-        console.error('Erreur lors de la tentative de désactivation de tous les rulesets:', error);
-      }
+      chrome.declarativeNetRequest.updateDynamicRules({
+        removeRuleIds: [1]
+      })
     }
   }
 });
@@ -184,12 +196,6 @@ async function handleAutoReload() {
   }
 }
 
-//generer un nouveau regle pour le usurpation du UserAgent selon le nombre de regles (default: 100) (max: 100)
-//chrome permet un maximum de 100 regles statiques
-function generateRandomRuleset(maxRuleset) {
-  return (Math.floor(Math.random() * maxRuleset) + 1).toString();
-}
-
 
 function applySpoofingNavigator(config) {
   try {
@@ -207,14 +213,14 @@ function applySpoofingNavigator(config) {
     const language = config.language === 'random' ? getRandomElement(Object.keys(languages)) : (config.language || getRandomElement(Object.keys(languages)));
 
     // Vérification des valeurs min/max pour le navigateur
-    const minVersion = config.minVersion === 'random' ? getRandomInRange(70, 100) : (config.minVersion || 70);
-    const maxVersion = config.maxVersion === 'random' ? getRandomInRange(minVersion, 120) : (config.maxVersion || 120);
+    const minVersion = config.minVersion == 0 ? getRandomInRange(70, 100) : (config.minVersion || 70);
+    const maxVersion = config.maxVersion == 0 ? getRandomInRange(minVersion, 120) : (config.maxVersion || 120);
 
     const browserVersion = generateBrowserVersion(minVersion, maxVersion);
 
     // Gestion des cœurs CPU et de la mémoire
-    const hardwareConcurrency = config.hardwareConcurrency === 'random' ? getRandomInRange(1, 8) : parseInt(config.hardwareConcurrency);
-    const deviceMemory = config.deviceMemory === 'random' ? getRandomInRange(1, 8) : parseInt(config.deviceMemory);
+    const hardwareConcurrency = config.hardwareConcurrency == 0 ? getRandomElement[2, 4, 8, 16] : parseInt(config.hardwareConcurrency);
+    const deviceMemory = config.deviceMemory == 0 ? getRandomElement([4, 8, 16, 32]) : parseInt(config.deviceMemory);
 
     // Création de l'objet fakeNavigator
     const fakeNavigator = {
@@ -283,6 +289,8 @@ function applySpoofingNavigator(config) {
     return `${major}.${minor}.0`;
   }
 }
+
+
 function applyUserAgentDataSpoofing(userAgentConfig) {
   try {
     // Définir des marques fictives
@@ -300,7 +308,7 @@ function applyUserAgentDataSpoofing(userAgentConfig) {
     const architecture = userAgentConfig.uaArchitecture === 'random' ? getRandomElement(["x86", "x86_64"]) : userAgentConfig.uaArchitecture;
     const bitness = userAgentConfig.uaBitness === 'random' ? getRandomElement(["32", "64"]) : userAgentConfig.uaBitness;
     // const wow64 = (architecture === "x86_64") ? true : false; // Déterminer wow64 selon l'architecture
-    const wow64 = userAgentConfig.uaWow64 === 'random' ? getRandomElement([true, false]) : userAgentConfig.uaWow64;
+    const wow64 = userAgentConfig.uaWow64 === 'random' ? getRandomElement([true]) : userAgentConfig.uaWow64;
     const model = userAgentConfig.uaModel === 'random' ? getRandomElement(["", "Model X", "Model Y"]) : userAgentConfig.uaModel;
     const uaFullVersion = userAgentConfig.uaFullVersion === 'random' ? generateBrowserVersion(120, 130) : userAgentConfig.uaFullVersion;
 
@@ -313,9 +321,9 @@ function applyUserAgentDataSpoofing(userAgentConfig) {
           { brand: getRandomElement(['Not=A?Brand']), version: generateBrowserVersion(8, 20) }
         ];
       },
-      // get mobile() {
-      //   return mobile;
-      // },
+      get mobile() {
+        return false;
+      },
       get platform() {
         return platform;
       },
@@ -370,5 +378,125 @@ function applyUserAgentDataSpoofing(userAgentConfig) {
     const major = getRandomInRange(minVersion, maxVersion);
     const minor = getRandomInRange(0, 99);
     return `${major}.${minor}.0`;
+  }
+}
+
+
+function getNewRules(config) {
+  const browsersVersions = {
+    "Chrome": [120, 119, 118],
+    "Firefox": [126, 125, 124],
+    "Safari": [17, 16, 15],
+  };
+
+  // Fonction pour générer un User-Agent aléatoire
+  function generateUserAgent(browser) {
+    const version = getRandomElement(browsersVersions[browser]);
+
+    if (browser === "Chrome") {
+      return `Mozilla/5.0 (Windows NT 11.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${version}.0.${getRandomInRange(0, 999)} Safari/537.36`;
+    } else if (browser === "Firefox") {
+      return `Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:${version}.0) Gecko/20100101 Firefox/${version}.0`;
+    } else if (browser === "Safari") {
+      return `Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/${version}.0 Safari/605.1.15`;
+    }
+  }
+
+  // Fonction pour générer des valeurs fictives pour les en-têtes
+  function generateHeaders() {
+    const headers = [
+      { header: "User-Agent", operation: "set", value: config.browser === 'random' ? generateUserAgent(getRandomElement(Object.keys(browsersVersions))) : generateUserAgent(config.browser) },
+      { header: "sec-ch-ua", operation: "set", value: config.secChUa === 'random' ? getRandomElement(["", "Chromium", "Not A;Brand"]) : config.secChUa },
+      { header: "sec-ch-ua-mobile", operation: "set", value: config.secChUaMobile === 'random' ? "?0" : config.secChUaMobile },
+      { header: "sec-ch-ua-platform", operation: "set", value: config.secChUaPlatform === 'random' ? '""' : config.secChUaPlatform },
+      { header: "sec-ch-ua-full-version", operation: "set", value: config.secChUaFullVersion === 'random' ? "" : config.secChUaFullVersion },
+      { header: "sec-ch-ua-platform-version", operation: "set", value: config.secChUaPlatformVersion === 'random' ? "" : config.secChUaPlatformVersion },
+      { header: "Device-Memory", operation: "set", value: config.hDeviceMemory === 'random' ? String(getRandomElement([8, 16, 32])) : String(config.hDeviceMemory) },
+      { header: "Referer", operation: "set", value: config.referer || "" },
+      { header: "Content-Encoding", operation: "set", value: config.contentEncoding === 'random' ? getRandomElement(["gzip", "deflate"]) : config.contentEncoding },
+      //
+      { header: "see-ch-ua-full-version-list", operation: "set", value: "" }
+    ]
+
+    return headers;
+  }
+
+  // Fonction pour générer les règles avec un ID unique
+  function generateRules(ruleId) {
+    return [
+      {
+        id: ruleId,
+        priority: 10,
+        action: { type: "modifyHeaders", requestHeaders: generateHeaders() },
+        condition: {
+          urlFilter: "*",
+          resourceTypes: [
+            "main_frame",
+            "sub_frame",
+            "stylesheet",
+            "script",
+            "image",
+            "font",
+            "xmlhttprequest",
+          ],
+        },
+      }
+    ];
+  }
+
+
+  // Génération d'un ID de règle unique
+  // const ruleId = Date.now(); // Utiliser le timestamp comme ID unique
+  const ruleId = 1
+
+  // Fonctions utilitaires pour obtenir des éléments aléatoires
+  function getRandomElement(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  function getRandomInRange(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  // Retourner les nouvelles règles
+  return generateRules(ruleId);
+}
+
+function modifyUserAgent(config) {
+  const minVersion = config.minVersion === 0 ? getRandomInRange(70, 100) : (config.minVersion || 70);
+  const maxVersion = config.maxVersion === 0 ? getRandomInRange(120, 130) : (config.maxVersion || 120);
+  const uaPlatform = config.uaPlatform === 'random' ? getRandomElement(["Linux", "Windows NT 10.0", "MacIntel", "Windows 11"]) : config.uaPlatform;
+  const browserVersion = generateBrowserVersion(minVersion, maxVersion);
+  const userAgent = `Mozilla/5.0 (${uaPlatform}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${browserVersion} Safari/537.36`
+
+  Object.defineProperty(navigator, 'userAgent', {
+    value: userAgent,
+    configurable: true,
+    enumerable: true
+  });
+  //platform
+  Object.defineProperty(navigator, 'platform', {
+    value: uaPlatform,
+    configurable: true,
+    enumerable: true
+  })
+  //appVersion
+  Object.defineProperty(navigator, 'appVersion', {
+    value: `5.0 (${uaPlatform} AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${browserVersion} Safari/537.36)`,
+    configurable: true,
+    enumerable: true
+  })
+
+  function generateBrowserVersion(minVersion, maxVersion) {
+    const major = getRandomInRange(minVersion, maxVersion);
+    const minor = getRandomInRange(0, 99);
+    return `${major}.${minor}.0`;
+  }
+
+  function getRandomInRange(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+  function getRandomElement(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
   }
 }

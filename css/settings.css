@@ -148,3 +148,44 @@ input:checked+.slider:before {
   background-color: #fee2e2;
   color: #991b1b;
 }
+
+/* section 2*/
+.select-input {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+  background-color: white;
+  min-width: 150px;
+}
+
+.number-input {
+  padding: 8px;
+  border-radius: 4px;
+  border: 1px solid #e5e7eb;
+  width: 80px;
+}
+
+.version-inputs {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.version-inputs span {
+  color: #6b7280;
+}
+
+/* save status */
+/*fais en sorte quand ca affiche, il affiche en haut de page*/
+#saveStatus {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 10;
+}
+
+.text-input {
+  padding: 7px;
+  border: 1px solid #e5e7eb;
+}

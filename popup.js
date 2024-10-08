@@ -183,7 +183,7 @@ async function reloadAllTabs() {
 }
 
 // setTimeout(() => {
-//   document.getElementById('loading').style.display = 'none';
-// }, 2000);
 document.getElementById('loading').style.display = 'none';
+// }, 313);
+// document.getElementById('loading').style.display = 'none';
 
