@@ -1,19 +1,39 @@
 // Configuration par défaut
 const defaultSettings = {
+  //
   spoofNavigator: false,
   spoofUserAgent: false,
   spoofCanvas: false,
   blockImages: false,
   blockJS: false,
+  //
   autoReloadAll: false,
   autoReloadCurrent: false,
+  //
+  platform: 'random',
+  language: 'random',
+  hardwareConcurrency: 0,
+  deviceMemory: 0,
+  minVersion: 0,
+  maxVersion: 0,
+  //
+  uaPlatform: 'random',
+  uaPlatformVersion: 'random',
+  uaArchitecture: 'random',
+  uaBitness: 'random',
+  uaWow64: 'random',
+  uaModel: 'random',
+  uaFullVersion: 'random'
+};
+
+const navigatorFields = {
   platform: 'random',
   language: 'random',
   hardwareConcurrency: 4,
-  deviceMemory: 16,
+  deviceMemory: 8,
   minVersion: 110,
-  maxVersion: 120,
-};
+  maxVersion: 120
+}
 
 //maximum de règles pour le l'usurpation du header
 const maxRuleset = 100;
@@ -78,10 +98,18 @@ chrome.webNavigation.onCommitted.addListener((details) => {
     if (settings.spoofNavigator) {
       chrome.scripting.executeScript({
         target: { tabId: details.tabId },
-        files: ['./spoofer/spoof-navigator.js'],
         injectImmediately: true,
-        world: 'MAIN'
+        world: 'MAIN',
+        func: applySpoofingNavigator,
+        args: [settings]
       }).catch(console.error);
+      chrome.scripting.executeScript({
+        target: { tabId: details.tabId },
+        injectImmediately: true,
+        world: 'MAIN',
+        func: applyUserAgentDataSpoofing,
+        args: [settings]
+      })
     }
 
     //usurper le UserAgent
@@ -163,3 +191,184 @@ function generateRandomRuleset(maxRuleset) {
 }
 
 
+function applySpoofingNavigator(config) {
+  try {
+    const platforms = ['Windows NT 10.0', 'Windows NT 11.0', 'MacIntel', 'Linux x86_64'];
+    const languages = {
+      'fr-FR': ['fr-FR', 'fr'],
+      'en-US': ['en-US', 'en'],
+      'en-GB': ['en-GB', 'en'],
+      'es-ES': ['es-ES', 'es'],
+      'de-DE': ['de-DE', 'de']
+    };
+
+    // Adaptation des valeurs en fonction des spécifications de l'utilisateur
+    const platform = config.platform === 'random' ? getRandomElement(platforms) : (config.platform || getRandomElement(platforms));
+    const language = config.language === 'random' ? getRandomElement(Object.keys(languages)) : (config.language || getRandomElement(Object.keys(languages)));
+
+    // Vérification des valeurs min/max pour le navigateur
+    const minVersion = config.minVersion === 'random' ? getRandomInRange(70, 100) : (config.minVersion || 70);
+    const maxVersion = config.maxVersion === 'random' ? getRandomInRange(minVersion, 120) : (config.maxVersion || 120);
+
+    const browserVersion = generateBrowserVersion(minVersion, maxVersion);
+
+    // Gestion des cœurs CPU et de la mémoire
+    const hardwareConcurrency = config.hardwareConcurrency === 'random' ? getRandomInRange(1, 8) : parseInt(config.hardwareConcurrency);
+    const deviceMemory = config.deviceMemory === 'random' ? getRandomInRange(1, 8) : parseInt(config.deviceMemory);
+
+    // Création de l'objet fakeNavigator
+    const fakeNavigator = {
+      platform: platform,
+      userAgent: `Mozilla/5.0 (${platform}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${browserVersion} Safari/537.36`,
+      language: language,
+      languages: languages[language],
+      hardwareConcurrency: hardwareConcurrency,
+      deviceMemory: deviceMemory,
+      vendor: 'Google Inc.',
+      maxTouchPoints: platform.includes('Windows') ? 0 : 5,
+      cookieEnabled: true,
+      doNotTrack: '1',
+      appName: 'Netscape',
+      appCodeName: 'Mozilla',
+      onLine: true,
+      appVersion: `5.0 (${platform} AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${browserVersion} Safari/537.36)`,
+      pdfViewerEnabled: true,
+      scheduling: {
+        isInputPending: () => false
+      },
+      connection: {
+        effectiveType: getRandomElement(['4g', 'wifi']),
+        rtt: getRandomInRange(50, 100),
+        downlink: getRandomInRange(5, 15),
+        saveData: false
+      },
+      mediaCapabilities: {
+        decodingInfo: async () => ({
+          supported: true,
+          smooth: true,
+          powerEfficient: true
+        })
+      }
+    };
+
+    // Définition des propriétés dans l'objet navigator
+    for (let prop in fakeNavigator) {
+      try {
+        Object.defineProperty(navigator, prop, {
+          get: () => fakeNavigator[prop],
+          configurable: true,
+          enumerable: true
+        });
+        console.log('Propriété modifiée:', prop + ' avec valeur:', fakeNavigator[prop]);
+      } catch (e) {
+        console.debug(`Impossible de modifier ${prop}:`, e);
+      }
+    }
+  } catch (error) {
+    console.error('Erreur lors du spoofing du navigator:', error);
+  }
+
+  // Fonctions utilitaires
+  function getRandomElement(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  function getRandomInRange(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function generateBrowserVersion(minVersion, maxVersion) {
+    const major = getRandomInRange(minVersion, maxVersion);
+    const minor = getRandomInRange(0, 99);
+    return `${major}.${minor}.0`;
+  }
+}
+function applyUserAgentDataSpoofing(userAgentConfig) {
+  try {
+    // Définir des marques fictives
+    const brands = [
+      "Google chrome",
+      "Edge",
+      // "Not=A?Brand",
+      "Firefox",
+      "Safari"
+    ];
+
+    // Créer des valeurs basées sur l'objet userAgentConfig
+    const platform = userAgentConfig.uaPlatform === 'random' ? getRandomElement(["Linux", "Windows NT 10.0", "MacIntel", "Windows 11"]) : userAgentConfig.uaPlatform;
+    const platformVersion = userAgentConfig.uaPlatformVersion === 'random' ? `${getRandomInRange(6, 12)}.${getRandomInRange(0, 10)}.${getRandomInRange(0, 100)}` : userAgentConfig.uaPlatformVersion;
+    const architecture = userAgentConfig.uaArchitecture === 'random' ? getRandomElement(["x86", "x86_64"]) : userAgentConfig.uaArchitecture;
+    const bitness = userAgentConfig.uaBitness === 'random' ? getRandomElement(["32", "64"]) : userAgentConfig.uaBitness;
+    // const wow64 = (architecture === "x86_64") ? true : false; // Déterminer wow64 selon l'architecture
+    const wow64 = userAgentConfig.uaWow64 === 'random' ? getRandomElement([true, false]) : userAgentConfig.uaWow64;
+    const model = userAgentConfig.uaModel === 'random' ? getRandomElement(["", "Model X", "Model Y"]) : userAgentConfig.uaModel;
+    const uaFullVersion = userAgentConfig.uaFullVersion === 'random' ? generateBrowserVersion(120, 130) : userAgentConfig.uaFullVersion;
+
+    const brand = getRandomElement(brands)
+    // Créer un objet userAgentData fictif
+    const fakeUserAgentData = {
+      get brands() {
+        return [
+          { brand: brand, version: generateBrowserVersion(120, 130) },
+          { brand: getRandomElement(['Not=A?Brand']), version: generateBrowserVersion(8, 20) }
+        ];
+      },
+      // get mobile() {
+      //   return mobile;
+      // },
+      get platform() {
+        return platform;
+      },
+      get platformVersion() {
+        return platformVersion;
+      },
+      get architecture() {
+        return architecture;
+      },
+      get bitness() {
+        return bitness;
+      },
+      get wow64() {
+        return wow64;
+      },
+      get model() {
+        return model;
+      },
+      get uaFullVersion() {
+        return uaFullVersion;
+      },
+      get fullVersionList() {
+        return [
+          { brand: brand, version: uaFullVersion },
+          { brand: brand, version: generateBrowserVersion(120, 130) }
+        ];
+      }
+    };
+
+    // Définir la propriété userAgentData dans l'objet navigator
+    Object.defineProperty(navigator, 'userAgentData', {
+      value: fakeUserAgentData,
+      configurable: true,
+      enumerable: true
+    });
+
+    console.log('userAgentData modifié:', navigator.userAgentData);
+
+  } catch (error) {
+    console.error('Erreur lors du spoofing de userAgentData:', error);
+  }
+
+  function getRandomElement(arr) {
+    return arr[Math.floor(Math.random() * arr.length)];
+  }
+
+  function getRandomInRange(min, max) {
+    return Math.floor(Math.random() * (max - min + 1)) + min;
+  }
+
+  function generateBrowserVersion(minVersion, maxVersion) {
+    const major = getRandomInRange(minVersion, maxVersion);
+    const minor = getRandomInRange(0, 99);
+    return `${major}.${minor}.0`;
+  }
+}
