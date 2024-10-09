@@ -1,5 +1,6 @@
 // Configuration des IDs des switches et leur correspondance avec les paramètres
 const settingsMappings = {
+  'ghostMode': 'ghostMode',
   'spoofNavigator': 'spoofNavigator',
   'spoofUserAgent': 'spoofUserAgent',
   'spoofCanvas': 'spoofCanvas',
@@ -50,6 +51,11 @@ for (const elementId of Object.keys(settingsMappings)) {
       const value = event.target.checked;
       // Mise à jour de l'état local
       currentSettings[setting] = value;
+
+      //ghost mode
+      if (setting === 'ghostMode') {
+        toggleGhostMode(value);
+      }
       updateStatus();
 
       try {
@@ -81,6 +87,10 @@ function updateInterface(settings) {
     if (element) {
       element.checked = settings[settingKey];
     }
+  }
+
+  if (settings.ghostMode) {
+    toggleGhostMode(true);
   }
 
   // Mise à jour du statut
@@ -186,4 +196,47 @@ async function reloadAllTabs() {
 document.getElementById('loading').style.display = 'none';
 // }, 313);
 // document.getElementById('loading').style.display = 'none';
+
+
+// /fonction qui active ou désactive le mode fantôme
+
+function toggleGhostMode(enabled) {
+  const normalControls = document.getElementById('normalControls');
+  const ghostModeIcon = document.getElementById('ghostModeIcon');
+  const statusElement = document.getElementById('status');
+
+  if (enabled) {
+    normalControls.style.display = 'none';
+    ghostModeIcon.style.display = 'block';
+
+    //Masquer le status
+    statusElement.style.display = 'none';
+
+    // Désactiver tous les autres contrôles
+    Object.keys(settingsMappings).forEach(id => {
+      if (id !== 'ghostMode') {
+        const element = document.getElementById(id);
+        if (element) {
+          element.checked = false;
+          element.disabled = true;
+        }
+      }
+    });
+  } else {
+    normalControls.style.display = 'block';
+    ghostModeIcon.style.display = 'none';
+    //afficher le status
+    statusElement.style.display = 'block';
+
+    // Réactiver tous les contrôles
+    Object.keys(settingsMappings).forEach(id => {
+      if (id !== 'ghostMode') {
+        const element = document.getElementById(id);
+        if (element) {
+          element.disabled = false;
+        }
+      }
+    });
+  }
+}
 

@@ -1,5 +1,7 @@
 // Configuration par défaut
 const defaultSettings = {
+  //mode fantôme
+  ghostMode: false,
   //
   spoofNavigator: false,
   spoofUserAgent: false,
@@ -69,35 +71,67 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 chrome.webNavigation.onCommitted.addListener((details) => {
   if (details.url.startsWith('chrome://') || details.url.startsWith("chrome-extension://")) {
     return;
-  } else {
+  }
 
-    //usurper le canvas
-    if (settings.spoofCanvas) {
-      chrome.scripting.executeScript({
-        target: { tabId: details.tabId },
-        files: ['./spoofer/spoof-canvas.js'],
-        injectImmediately: true,
-        world: 'MAIN'
-      }).then((result) => {
-        console.log('Script injecté dans le canvas:', result);
-      }).catch((error) => {
-        console.error('Erreur lors de l\'injection du script:', error);
-      });
-    }
+  if (settings.ghostMode) {
+    applyGhostMode(details.tabId);
+    return; // Ne pas appliquer les autres modifications si le mode fantôme est actif
+  }
 
-    //usurper le Navigator
-    if (settings.spoofNavigator) {
-      chrome.scripting.executeScript({
-        target: { tabId: details.tabId },
-        injectImmediately: true,
-        world: 'MAIN',
-        func: applySpoofingNavigator,
-        args: [settings]
-      }).then((result) => {
-        console.log('Script injecté dans le Navigator:', result);
-      }).catch((error) => {
-        console.error('Erreur lors de l\'injection du script:', error);
-      });
+  //usurper le canvas
+  if (settings.spoofCanvas) {
+    chrome.scripting.executeScript({
+      target: { tabId: details.tabId },
+      files: ['./spoofer/spoof-canvas.js'],
+      injectImmediately: true,
+      world: 'MAIN'
+    }).then((result) => {
+      console.log('Script injecté dans le canvas:', result);
+    }).catch((error) => {
+      console.error('Erreur lors de l\'injection du script:', error);
+    });
+  }
+
+  //usurper le Navigator
+  if (settings.spoofNavigator) {
+    chrome.scripting.executeScript({
+      target: { tabId: details.tabId },
+      injectImmediately: true,
+      world: 'MAIN',
+      func: applySpoofingNavigator,
+      args: [settings]
+    }).then((result) => {
+      console.log('Script injecté dans le Navigator:', result);
+    }).catch((error) => {
+      console.error('Erreur lors de l\'injection du script:', error);
+    });
+    chrome.scripting.executeScript({
+      target: { tabId: details.tabId },
+      injectImmediately: true,
+      world: 'MAIN',
+      func: applyUserAgentDataSpoofing,
+      args: [settings]
+    }).then((result) => {
+      console.log('Script injecté dans userAgentData:', result);
+    }).catch((error) => {
+      console.error('Erreur lors de l\'injection du script:', error);
+    });
+  }
+
+  //usurper le UserAgent
+  if (settings.spoofUserAgent) {
+    const newRule = getNewRules(settings);
+    chrome.declarativeNetRequest.updateDynamicRules({
+      removeRuleIds: [1], //eviter la duplication
+      addRules: newRule
+    }).then((result) => {
+      console.log('Règle modifiée:', result);
+    }).catch((error) => {
+      console.error('Erreur lors de la modification de la règle:', error);
+    });
+    console.log(`Activation du nouveau regle: ${newRule.id}`);
+    if (!settings.spoofNavigator) {
+      console.log("Spoof the navigator user agent niveau javascript");
       chrome.scripting.executeScript({
         target: { tabId: details.tabId },
         injectImmediately: true,
@@ -109,51 +143,24 @@ chrome.webNavigation.onCommitted.addListener((details) => {
       }).catch((error) => {
         console.error('Erreur lors de l\'injection du script:', error);
       });
-    }
-
-    //usurper le UserAgent
-    if (settings.spoofUserAgent) {
-      const newRule = getNewRules(settings);
-      chrome.declarativeNetRequest.updateDynamicRules({
-        removeRuleIds: [1], //eviter la duplication
-        addRules: newRule
+      chrome.scripting.executeScript({
+        target: { tabId: details.tabId },
+        injectImmediately: true,
+        world: 'MAIN',
+        func: modifyUserAgent,
+        args: [settings]
       }).then((result) => {
-        console.log('Règle modifiée:', result);
+        console.log('Script injecté dans userAgent:', result);
       }).catch((error) => {
-        console.error('Erreur lors de la modification de la règle:', error);
+        console.error('Erreur lors de l\'injection du script:', error);
       });
-      console.log(`Activation du nouveau regle: ${newRule.id}`);
-      if (!settings.spoofNavigator) {
-        console.log("Spoof the navigator user agent niveau javascript");
-        chrome.scripting.executeScript({
-          target: { tabId: details.tabId },
-          injectImmediately: true,
-          world: 'MAIN',
-          func: applyUserAgentDataSpoofing,
-          args: [settings]
-        }).then((result) => {
-          console.log('Script injecté dans userAgentData:', result);
-        }).catch((error) => {
-          console.error('Erreur lors de l\'injection du script:', error);
-        });
-        chrome.scripting.executeScript({
-          target: { tabId: details.tabId },
-          injectImmediately: true,
-          world: 'MAIN',
-          func: modifyUserAgent,
-          args: [settings]
-        }).then((result) => {
-          console.log('Script injecté dans userAgent:', result);
-        }).catch((error) => {
-          console.error('Erreur lors de l\'injection du script:', error);
-        });
-      }
-    } else {
-      chrome.declarativeNetRequest.updateDynamicRules({
-        removeRuleIds: [1]
-      })
     }
+  } else {
+    chrome.declarativeNetRequest.updateDynamicRules({
+      removeRuleIds: [1]
+    })
   }
+
 });
 
 
@@ -237,6 +244,8 @@ function applySpoofingNavigator(config) {
       appName: 'Netscape',
       appCodeName: 'Mozilla',
       onLine: true,
+      plugins: undefined,
+      mimeTypes: undefined,
       appVersion: `5.0 (${platform} AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${browserVersion} Safari/537.36)`,
       pdfViewerEnabled: true,
       scheduling: {
@@ -297,7 +306,6 @@ function applyUserAgentDataSpoofing(userAgentConfig) {
     const brands = [
       "Google chrome",
       "Edge",
-      // "Not=A?Brand",
       "Firefox",
       "Safari"
     ];
@@ -446,7 +454,6 @@ function getNewRules(config) {
 
 
   // Génération d'un ID de règle unique
-  // const ruleId = Date.now(); // Utiliser le timestamp comme ID unique
   const ruleId = 1
 
   // Fonctions utilitaires pour obtenir des éléments aléatoires
@@ -499,4 +506,88 @@ function modifyUserAgent(config) {
   function getRandomElement(arr) {
     return arr[Math.floor(Math.random() * arr.length)];
   }
+}
+
+//fonction qui applique ghostMode
+function applyGhostMode(tabId) {
+  chrome.scripting.executeScript({
+    target: { tabId: tabId },
+    injectImmediately: true,
+    world: 'MAIN',
+    func: () => {
+      const makeUndefined = (obj, prop) => {
+        try {
+          Object.defineProperty(obj, prop, {
+            get: () => undefined,
+            configurable: false,
+            enumerable: true
+          });
+        } catch (e) {
+          console.debug(`Impossible de modifier ${prop}:`, e);
+        }
+      };
+
+      // Liste des propriétés à rendre undefined
+      const propsToHide = [
+        'userAgent', 'platform', 'language', 'languages', 'hardwareConcurrency',
+        'deviceMemory', 'vendor', 'appVersion', 'userAgentData', 'oscpu',
+        'connection', 'getBattery', 'getGamepads', 'permissions', 'mediaDevices',
+        'serviceWorker', 'geolocation', 'clipboard', 'credentials', 'keyboard',
+        'locks', 'mediaCapabilities', 'mediaSession', 'plugins', 'presentation',
+        'scheduling', 'usb', 'xr', 'mimeTypes',
+        //web audio
+
+
+      ];
+
+      // Appliquer undefined à toutes les propriétés
+      propsToHide.forEach(prop => makeUndefined(navigator, prop));
+
+      // Rendre Canvas inutilisable
+      const origGetContext = HTMLCanvasElement.prototype.getContext;
+      HTMLCanvasElement.prototype.getContext = function () {
+        return null;
+      };
+    }
+  });
+
+  // Modifier les en-têtes HTTP
+  const rule = {
+    id: 999,
+    priority: 1,
+    action: {
+      type: "modifyHeaders",
+      requestHeaders: [
+        { header: "User-Agent", operation: "remove" },
+        { header: "Accept-Language", operation: "remove" },
+        { header: "DNT", operation: "remove" },
+        { header: "Sec-CH-UA", operation: "remove" },
+        { header: "Sec-CH-UA-Mobile", operation: "remove" },
+        { header: "Sec-CH-UA-Platform", operation: "remove" },
+        { header: "Sec-CH-UA-Platform-Version", operation: "remove" },
+        { header: "sec-ch-ua-full-version-list", operation: "remove" },
+        { header: "sec-ch-ua-mobile", operation: "remove" },
+        { header: "sec-ch-ua-platform", operation: "remove" },
+        { header: "sec-ch-ua-platform-version", operation: "remove" },
+        { header: "Device-Memory", operation: "remove" },
+        { header: "Referer", operation: "remove" },
+        { header: "Content-Encoding", operation: "remove" },
+        { header: "Sec-Fetch-Site", operation: "remove" },
+        { header: "Accept-Encoding", operation: "remove" },
+        { header: "Sec-Ch-Device-Memory", operation: "remove" },
+        { header: "Sec-ch-drp", operation: "remove" },
+        { header: "viewport-width", operation: "remove" },
+        { header: "viewport-height", operation: "remove" },
+      ]
+    },
+    condition: {
+      urlFilter: "*",
+      resourceTypes: ["main_frame", "sub_frame", "stylesheet", "script", "image", "font", "object", "xmlhttprequest", "ping", "csp_report", "media", "websocket", "other"]
+    }
+  };
+
+  chrome.declarativeNetRequest.updateDynamicRules({
+    removeRuleIds: [999],
+    addRules: [rule]
+  });
 }

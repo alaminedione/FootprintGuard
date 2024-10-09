@@ -2,10 +2,8 @@
 <html>
   <head>
     <meta charset="UTF-8" />
-    <title>FingerprintGuard</title>
-    <link rel="stylesheet" href="./css/popup.css" />
+    <link rel="stylesheet" href="/css/popup.css" />
   </head>
-
   <body>
     <div id="loading">
       <div class="loading-spinner"></div>
@@ -14,11 +12,7 @@
     <div class="container">
       <div class="header">
         <h1>FingerprintGuard</h1>
-        <button
-          id="openSettings"
-          class="settings-button"
-          title="Paramètres avancés"
-        >
+        <div id="openSettings" class="settings-button">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             width="20"
@@ -35,122 +29,153 @@
             />
             <circle cx="12" cy="12" r="3" />
           </svg>
-        </button>
+        </div>
       </div>
+
+      <div id="ghostModeIcon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100">
+          <defs>
+            <filter id="glow">
+              <feGaussianBlur stdDeviation="2" result="coloredBlur" />
+              <feMerge>
+                <feMergeNode in="coloredBlur" />
+                <feMergeNode in="SourceGraphic" />
+              </feMerge>
+            </filter>
+          </defs>
+          <g filter="url(#glow)">
+            <path
+              d="M 50 20 C 30 20, 20 35, 20 55 C 20 75, 20 85, 20 85 L 25 80 L 30 85 L 35 80 L 40 85 L 45 80 L 50 85 L 55 80 L 60 85 L 65 80 L 70 85 L 75 80 L 80 85 C 80 85, 80 75, 80 55 C 80 35, 70 20, 50 20 Z"
+              fill="white"
+              stroke="currentColor"
+              stroke-width="2"
+            />
+            <circle cx="40" cy="45" r="5" fill="currentColor" />
+            <circle cx="60" cy="45" r="5" fill="currentColor" />
+          </g>
+        </svg>
+        <p id="ghostModeText">Ghost Mode activated</p>
+      </div>
+
       <div id="settings">
         <div class="item">
           <div>
-            <span class="item-label">
-              Usurpation du navigateur
-              <div class="tooltip">
-                ?
-                <span class="tooltip-text"
-                  >Modifie les informations du navigateur pour empêcher
-                  l'identification</span
-                >
-              </div>
+            <span class="item-label">Ghost Mode</span>
+            <span class="tooltip"
+              >?
+              <span class="tooltip-text"
+                >Makes all properties undetectable</span
+              >
             </span>
           </div>
-          <label class="switch">
-            <input type="checkbox" id="spoofNavigator" />
+          <label class="slider">
+            <input type="checkbox" id="ghostMode" />
             <span class="slider"></span>
           </label>
         </div>
 
-        <div class="item">
-          <div>
-            <span class="item-label">
-              Usurpation du user agent
-              <div class="tooltip">
-                ?
+        <div id="normalControls">
+          <div class="item">
+            <div>
+              <span class="item-label">Browser Spoofing</span>
+              <span class="tooltip"
+                >?
                 <span class="tooltip-text"
-                  >Change l'identité du navigateur envoyée aux sites web</span
+                  >Modifies browser information to prevent identification</span
                 >
-              </div>
-            </span>
+              </span>
+            </div>
+            <label class="slider">
+              <input type="checkbox" id="spoofNavigator" />
+              <span class="slider"></span>
+            </label>
           </div>
-          <label class="switch">
-            <input type="checkbox" id="spoofUserAgent" />
-            <span class="slider"></span>
-          </label>
-        </div>
 
-        <div class="item">
-          <div>
-            <span class="item-label">
-              Usurpation du canvas
-              <div class="tooltip">
-                ?
+          <div class="item">
+            <div>
+              <span class="item-label">User Agent Spoofing</span>
+              <span class="tooltip"
+                >?
                 <span class="tooltip-text"
-                  >Modifie légèrement le rendu canvas pour éviter le
+                  >Changes the browser identity sent to websites</span
+                >
+              </span>
+            </div>
+            <label class="slider">
+              <input type="checkbox" id="spoofUserAgent" />
+              <span class="slider"></span>
+            </label>
+          </div>
+
+          <div class="item">
+            <div>
+              <span class="item-label">Canvas Spoofing</span>
+              <span class="tooltip"
+                >?
+                <span class="tooltip-text"
+                  >Slightly modifies canvas rendering to avoid
                   fingerprinting</span
                 >
-              </div>
-            </span>
+              </span>
+            </div>
+            <label class="slider">
+              <input type="checkbox" id="spoofCanvas" />
+              <span class="slider"></span>
+            </label>
           </div>
-          <label class="switch">
-            <input type="checkbox" id="spoofCanvas" />
-            <span class="slider"></span>
-          </label>
-        </div>
 
-        <div class="item">
-          <div>
-            <span class="item-label">
-              Blocage des images
-              <div class="tooltip">
-                ?
-                <span class="tooltip-text"
-                  >Bloque le chargement des images
-                </span>
-              </div>
-            </span>
+          <div class="item">
+            <div>
+              <span class="item-label">Block Images</span>
+              <span class="tooltip"
+                >?
+                <span class="tooltip-text">Blocks loading of images</span>
+              </span>
+            </div>
+            <label class="slider">
+              <input type="checkbox" id="blockImages" />
+              <span class="slider"></span>
+            </label>
           </div>
-          <label class="switch">
-            <input type="checkbox" id="blockImages" />
-            <span class="slider"></span>
-          </label>
-        </div>
 
-        <div class="item">
-          <div>
-            <span class="item-label">
-              Blocage de JavaScript
-              <div class="tooltip">
-                ?
-                <span class="tooltip-text">Désactive JavaScript </span>
-              </div>
-            </span>
+          <div class="item">
+            <div>
+              <span class="item-label">Block JavaScript</span>
+              <span class="tooltip"
+                >?
+                <span class="tooltip-text">Disables JavaScript</span>
+              </span>
+            </div>
+            <label class="slider">
+              <input type="checkbox" id="blockJS" />
+              <span class="slider"></span>
+            </label>
           </div>
-          <label class="switch">
-            <input type="checkbox" id="blockJS" />
-            <span class="slider"></span>
-          </label>
         </div>
       </div>
 
       <div id="status" class="status">
-        <span id="statusText">Chargement...</span>
+        <span id="statusText">Loading...</span>
       </div>
+
+      <button id="reloadAllTabs">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          fill="none"
+          viewBox="0 0 24 24"
+          stroke="currentColor"
+        >
+          <path
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            stroke-width="2"
+            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+          />
+        </svg>
+        Reload All Pages
+      </button>
     </div>
 
-    <!-- boutton pour recharger tous les pages -->
-    <button id="reloadAllTabs" class="reload-button">
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        fill="none"
-        viewBox="0 0 24 24"
-        stroke="currentColor"
-      >
-        <path
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          stroke-width="2"
-          d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
-        />
-      </svg>
-      Recharger toutes les pages
-    </button>
     <script src="popup.js"></script>
   </body>
 </html>

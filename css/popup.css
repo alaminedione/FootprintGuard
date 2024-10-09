@@ -1,152 +1,26 @@
 body {
   width: 300px;
   margin: 0;
+  padding: 15px;
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
     Ubuntu, Cantarell, sans-serif;
+  background: #121212; /* Couleur de fond sombre */
+  color: #e0e0e0; /* Texte clair pour le contraste */
+  transition:
+    background 0.3s,
+    color 0.3s; /* Transition douce pour le thème */
 }
-
-.container {
-  padding: 16px;
-}
-
-.header {
-  background: #2563eb;
-  color: white;
-  padding: 12px 16px;
-  margin: -16px -16px 16px -16px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.header h1 {
-  margin: 0;
-  font-size: 18px;
-}
-
-.item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 0;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.item:last-child {
-  border-bottom: none;
-}
-
-.switch {
-  position: relative;
-  display: inline-block;
-  width: 48px;
-  height: 24px;
-}
-
-.switch input {
-  opacity: 0;
-  width: 0;
-  height: 0;
-}
-
-.slider {
-  position: absolute;
-  cursor: pointer;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: #ccc;
-  transition: 0.4s;
-  border-radius: 24px;
-}
-
-.slider:before {
-  position: absolute;
-  content: "";
-  height: 18px;
-  width: 18px;
-  left: 3px;
-  bottom: 3px;
-  background-color: white;
-  transition: 0.4s;
-  border-radius: 50%;
-}
-
-input:checked+.slider {
-  background-color: #2563eb;
-}
-
-input:checked+.slider:before {
-  transform: translateX(24px);
-}
-
-.item-label {
-  font-size: 14px;
-  color: #374151;
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.item-info {
-  color: #6b7280;
-  font-size: 12px;
-  margin-top: 4px;
-}
-
-.status {
-  text-align: center;
-  padding: 12px;
-  background: #f3f4f6;
-  margin-top: 16px;
-  border-radius: 6px;
-  font-size: 14px;
-  color: #374151;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-}
-
-.status.active {
-  background: #dcfce7;
-  color: #166534;
-}
-
-.status.inactive {
-  background: #fee2e2;
-  color: #991b1b;
-}
-
-.tooltip {
-  position: relative;
-  display: inline-block;
-  cursor: help;
-}
-
-.tooltip .tooltip-text {
-  visibility: hidden;
-  width: 200px;
-  background-color: #374151;
-  color: white;
-  text-align: center;
-  border-radius: 6px;
-  padding: 8px;
-  position: absolute;
-  z-index: 1;
-  bottom: 125%;
-  left: 50%;
-  transform: translateX(-50%);
-  opacity: 0;
-  transition: opacity 0.3s;
-  font-size: 12px;
-}
-
-.tooltip:hover .tooltip-text {
-  visibility: visible;
-  opacity: 1;
-}
+/* body { */
+/*   width: 300px; */
+/*   margin: 0; */
+/*   padding: 15px; */
+/*   font-family: */
+/*     system-ui, */
+/*     -apple-system, */
+/*     sans-serif; */
+/*   background: #1a1b1e; */
+/*   color: #fff; */
+/* } */
 
 #loading {
   position: fixed;
@@ -154,7 +28,7 @@ input:checked+.slider:before {
   left: 0;
   right: 0;
   bottom: 0;
-  background: rgba(255, 255, 255, 0.8);
+  background: #1a1b1e;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -162,79 +36,197 @@ input:checked+.slider:before {
 }
 
 .loading-spinner {
-  width: 24px;
-  height: 24px;
-  border: 3px solid #f3f3f3;
-  border-top: 3px solid #2563eb;
+  width: 40px;
+  height: 40px;
+  border: 3px solid #ffffff3d;
+  border-top: 3px solid #fff;
   border-radius: 50%;
   animation: spin 1s linear infinite;
 }
 
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-/*boutton reload*/
-.reload-button {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-  background-color: #2563eb;
-  color: white;
-  border: none;
-  padding: 8px 16px;
-  border-radius: 6px;
-  cursor: pointer;
-  width: 100%;
-  margin-top: 16px;
-  font-size: 14px;
-  transition: background-color 0.3s;
-}
-
-.reload-button:hover {
-  background-color: #1d4ed8;
-}
-
-.reload-button:active {
-  background-color: #1e40af;
-}
-
-.reload-button svg {
-  width: 16px;
-  height: 16px;
-}
-
-.reload-button.loading {
-  opacity: 0.7;
-  cursor: not-allowed;
-}
-
-.reload-button.loading svg {
-  animation: spin 1s linear infinite;
-}
-
-@keyframes spin {
-  0% {
-    transform: rotate(0deg);
-  }
-
-  100% {
-    transform: rotate(360deg);
-  }
-}
-
-/*boutton settings*/
-
-.header {
+.container {
   position: relative;
 }
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 20px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #ffffff1a;
+}
+
+.header h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 600;
+}
+
+#ghostModeIcon {
+  text-align: center;
+  display: none;
+}
+
+#ghostModeIcon svg {
+  width: 150px;
+  height: 150px;
+  margin: 20px auto;
+}
+
+#ghostModeText {
+  color: #fff;
+  font-size: 1.2em;
+  margin-top: 10px;
+  text-align: center;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 0;
+  cursor: pointer;
+}
+
+.item-label {
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.tooltip {
+  position: relative;
+  display: inline-block;
+  margin-left: 5px;
+  width: 16px;
+  height: 16px;
+  background: #ffffff1a;
+  border-radius: 50%;
+  text-align: center;
+  line-height: 16px;
+  font-size: 12px;
+  cursor: help;
+}
+
+.tooltip-text {
+  visibility: hidden;
+  position: absolute;
+  width: 200px;
+  background-color: #333;
+  color: #fff;
+  text-align: center;
+  padding: 5px;
+  border-radius: 6px;
+  z-index: 1;
+  bottom: 125%;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 12px;
+}
+
+.tooltip:hover .tooltip-text {
+  visibility: visible;
+}
+
+.slider {
+  position: relative;
+  display: inline-block;
+  width: 40px;
+  height: 20px;
+}
+
+.slider input {
+  opacity: 0; /* Masquer l'input par défaut */
+  width: 0;
+  height: 0;
+}
+
+.slider span {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: #ffffff3d; /* Couleur de fond par défaut */
+  transition: background-color 0.4s;
+  border-radius: 20px; /* Arrondir les bords */
+}
+
+.slider span:before {
+  position: absolute;
+  content: "";
+  height: 16px;
+  width: 16px;
+  left: 2px;
+  bottom: 2px;
+  background-color: #d3d3d3;
+  border-radius: 50%; /* Arrondir le cercle */
+  transition: transform 0.4s;
+}
+
+input:checked + span {
+  background-color: #4caf50; /* Couleur de fond lorsqu'il est actif */
+}
+
+input:checked + span:before {
+  transform: translateX(20px); /* Déplacer le cercle à droite */
+}
+.status {
+  margin-top: 20px;
+  padding: 10px;
+  border-radius: 5px;
+  text-align: center;
+  font-size: 14px;
+  transition: 0.3s;
+}
+
+.status.active {
+  background: #4caf50;
+  color: white;
+}
+
+.status.inactive {
+  background: #f443361f;
+  color: #ff5722;
+}
+
+button {
+  width: 100%;
+  padding: 10px;
+  margin-top: 15px;
+  background: #ffffff1a;
+  border: none;
+  border-radius: 5px;
+  color: white;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: 0.2s;
+}
+
+button:hover {
+  background: #ffffff33;
+}
+
+button svg {
+  width: 20px;
+  height: 20px;
+}
+
+@keyframes spin {
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
+}
+
+/*---------------------------*/
+/*boutton settings*/
 
 .settings-button {
   background: none;
@@ -265,17 +257,4 @@ input:checked+.slider:before {
 .settings-button svg {
   width: 20px;
   height: 20px;
-}
-
-/* Mise à jour du header pour aligner les éléments */
-.header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 12px 16px;
-}
-
-.header h1 {
-  margin: 0;
-  font-size: 18px;
 }
