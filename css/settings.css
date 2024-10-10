@@ -101,11 +101,11 @@ body {
   border-radius: 50%;
 }
 
-input:checked+.slider {
+input:checked + .slider {
   background-color: #2563eb;
 }
 
-input:checked+.slider:before {
+input:checked + .slider:before {
   transform: translateX(24px);
 }
 
@@ -119,6 +119,7 @@ input:checked+.slider:before {
   font-size: 14px;
   transition: background-color 0.3s;
   margin-top: 20px;
+  margin-bottom: 20px;
 }
 
 .save-button:hover {
@@ -188,4 +189,38 @@ input:checked+.slider:before {
 .text-input {
   padding: 7px;
   border: 1px solid #e5e7eb;
+}
+
+/* section gestions des profils */
+
+.profile-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.profile-button {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background-color 0.3s;
+}
+
+.profile-button:hover {
+  background-color: #1d4ed8;
+}
+
+.profile-button:active {
+  background-color: #1e40af;
+}
+
+.profile-info {
+  background: #f9fafb;
+  padding: 12px;
+  border-radius: 4px;
+  margin-top: 8px;
 }

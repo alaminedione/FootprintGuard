@@ -12,6 +12,7 @@ const defaultSettings = {
   //
   platform: 'random',
   language: 'random',
+  // navSpoofBrowser: 'random',
   hardwareConcurrency: 0,
   deviceMemory: 0,
   minVersion: 0,
@@ -33,20 +34,95 @@ const defaultSettings = {
   secChUaPlatformVersion: 'random',
   hDeviceMemory: 'random',
   referer: '',
-  contentEncoding: 'random'
+  contentEncoding: 'random',
+  //
+  useFixedProfile: true,  // Si true, utilise un profil fixe au lieu de valeurs aléatoires
+  activeProfileId: null,   // ID du profil actif
+  generateNewProfileOnStart: true, // Génère un nouveau profil au démarrage du navigateur
+
 };
 
-// Initialisation des paramètres depuis le storage
+
+// Structure pour stocker les profils
+let profiles = {};
+let currentProfile = null;
+
 let settings = { ...defaultSettings };
-chrome.storage.sync.get(settings, (stored) => {
+
+// Initialisation
+async function initialize() {
+  const stored = await chrome.storage.sync.get(null);
   settings = { ...defaultSettings, ...stored };
-  console.log('parametres charges: ', settings);
-});
+
+  // Charger les profils existants
+  const storedProfiles = await chrome.storage.local.get('profiles');
+  profiles = storedProfiles.profiles || {};
+
+  // Gérer le profil actif
+  if (settings.useFixedProfile) {
+    if (settings.generateNewProfileOnStart) {
+      currentProfile = generateNewProfile();
+      settings.activeProfileId = currentProfile.id;
+      await saveProfile(currentProfile);
+    } else if (settings.activeProfileId) {
+      currentProfile = profiles[settings.activeProfileId];
+    }
+
+    if (!currentProfile) {
+      currentProfile = generateNewProfile();
+      settings.activeProfileId = currentProfile.id;
+      await saveProfile(currentProfile);
+    }
+  }
+
+  console.log('settings loaded:', settings);
+  console.log('currentProfile loaded:', currentProfile);
+}
+
+initialize()
+
+function generateNewProfile() {
+  const profile = {
+    id: Date.now().toString(),
+    createdAt: new Date().toISOString(),
+    fakeNavigator: getFakeNavigatorProperties(settings),
+    fakeUserAgentData: getFakeUserAgentData(settings),
+    fakeUserAgentWithRelatedProperties: generateUserAgent_with_relatated_properties(settings),
+    rules: getNewRules(settings, 1),
+  };
+
+  return profile;
+}
+
+
+// Sauvegarde d'un profil
+async function saveProfile(profile) {
+  profiles[profile.id] = profile;
+  await chrome.storage.local.set({ profiles });
+}
+
+
+// Obtention des valeurs de configuration
+function getConfigValue(key) {
+  if (settings.useFixedProfile && currentProfile) {
+    return currentProfile.properties[key] || settings[key];
+  }
+  return settings[key];
+}
 
 // Écoute des changements de paramètres
 chrome.storage.onChanged.addListener((changes) => {
   for (let [key, { newValue }] of Object.entries(changes)) {
     settings[key] = newValue;
+    // Si on change de profil actif
+    if (key === 'activeProfileId' && settings.useFixedProfile) {
+      currentProfile = profiles[newValue];
+      if (!currentProfile) {
+        currentProfile = generateNewProfile();
+        settings.activeProfileId = currentProfile.id;
+        saveProfile(currentProfile);
+      }
+    }
     console.log(`parametres modifier: ${key} = ${newValue}`);
   }
   handleAutoReload();
@@ -60,6 +136,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   } else if (message.type === 'updateSetting') {
     chrome.storage.sync.set({ [message.setting]: message.value });
     console.log(`parametre ${message.setting} mis à ${message.value}`);
+  } else if (message.type === 'generateNewProfile') {
+    const newProfile = generateNewProfile();
+    sendResponse(newProfile);
   }
 });
 
@@ -135,15 +214,37 @@ async function handleAutoReload() {
 
 // Fonctions de spoofing
 function spoofNavigator(tabId, config) {
-  const fakeNavigator = getFakeNavigatorProperties(config);
-  const fakeUserAgentData = generateUserAgentData(config);
-  console.log('usurpation de la navigation sur la page: ');
+  const fakeNavigator = settings.useFixedProfile && currentProfile
+    ? getFakeNavigatorPropertiesFromProfile(currentProfile)
+    : getFakeNavigatorProperties(config);
+
+  const fakeUserAgentData = settings.useFixedProfile && currentProfile
+    ? getFakeUserAgentDataFromProfile(currentProfile)
+    : getFakeUserAgentData(config);
+
+  console.log('Usurpation de la navigation sur la page');
   injectScript(tabId, applySpoofingNavigator, fakeNavigator);
   injectScript(tabId, applyUserAgentDataSpoofing, fakeUserAgentData);
 }
 
+
+function getFakeNavigatorPropertiesFromProfile(profile) {
+  return profile.fakeNavigator;
+}
+
+function getFakeUserAgentDataFromProfile(profile) {
+  return profile.fakeUserAgentData;
+}
+
+function getRulesFromProfiles(profile) {
+  return profile.rules
+}
+function getFakeUserAgentDataWithRelatedPropertiesFromProfile(profile) {
+  return profile.fakeUserAgentWithRelatedProperties
+}
+
 function spoofUserAgent(tabId, config) {
-  const newRule = getNewRules(config, 1); // 1 est un ID de règle unique
+  const newRule = settings.useFixedProfile && currentProfile ? getRulesFromProfiles(currentProfile) : getNewRules(config, 1); // 1 est un ID de règle unique
   console.log('usurpation de l\'user agent sur la page: ');
   chrome.declarativeNetRequest.updateDynamicRules({
     removeRuleIds: [1],
@@ -151,9 +252,13 @@ function spoofUserAgent(tabId, config) {
   });
   console.log('injection de  l\'script de modification de user agent');
   if (!settings.spoofNavigator) {
-    const fakeUserAgent = generateUserAgent_with_relatated_properties(settings);
-    injectScript(tabId, applyUserAgent, fakeUserAgent);
-    const fakeUserAgentData = generateUserAgentData(settings);
+    const fakeUserAgentWithRelatedProperties = settings.useFixedProfile && currentProfile
+      ? getFakeUserAgentDataWithRelatedPropertiesFromProfile(currentProfile)
+      : generateUserAgent_with_relatated_properties(settings);
+    injectScript(tabId, applyUserAgent, fakeUserAgentWithRelatedProperties);
+    const fakeUserAgentData = settings.useFixedProfile && currentProfile
+      ? getFakeUserAgentDataWithRelatedPropertiesFromProfile(currentProfile)
+      : getFakeUserAgentData(settings);
     injectScript(tabId, applyUserAgentDataSpoofing, fakeUserAgentData);
   }
 }
@@ -171,7 +276,6 @@ function injectScript(tabId, fileOrFunc, args) {
 }
 
 
-// Fonctions utilitaires pour le spoofing
 
 //fonction qui applique ghostMode
 function applyGhostMode(tabId) {
@@ -258,7 +362,7 @@ function applyGhostMode(tabId) {
   });
 }
 
-//----------------------------------------------
+
 
 // navigator spoofing
 function getFakeNavigatorProperties(config) {
@@ -270,6 +374,8 @@ function getFakeNavigatorProperties(config) {
     'es-ES': ['es-ES', 'es'],
     'de-DE': ['de-DE', 'de']
   };
+
+  // const browser = config.navSpoofBrowser === 'random' ? getRandomElement(Object.keys(browsersVersions)) : (config.navSpoofBrowser || getRandomElement(Object.keys(browsersVersions)));
 
   const platform = config.platform === 'random' ? getRandomElement(platforms) : (config.platform || getRandomElement(platforms));
   const language = config.language === 'random' ? getRandomElement(Object.keys(languages)) : (config.language || getRandomElement(Object.keys(languages)));
@@ -297,7 +403,10 @@ function getFakeNavigatorProperties(config) {
     appCodeName: 'Mozilla',
     appVersion: ` ${platform} AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${browserVersion} Safari/537.36`,
     onLine: true,
+    //NOTE: browser it's not in this list
+    // browser:browser,
     //TEST:
+    //plugins et undefined sould work
     plugins: undefined,
     mimeTypes: undefined,
     mediaDevices: undefined,
@@ -333,7 +442,7 @@ function applySpoofingNavigator(fakeNavigator) {
 }
 
 //user agent data spoofing
-function generateUserAgentData(userAgentConfig) {
+function getFakeUserAgentData(userAgentConfig) {
   const brands = [
     "Google Chrome",
     "Edge",

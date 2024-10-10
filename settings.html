@@ -1,323 +1,467 @@
-
 <!doctype html>
 <html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Settings - FingerprintGuard</title>
+    <link rel="stylesheet" href="./css/settings.css" />
+  </head>
 
-<head>
-  <meta charset="UTF-8" />
-  <title>Settings - FingerprintGuard</title>
-  <link rel="stylesheet" href="./css/settings.css" />
-</head>
+  <body>
+    <header class="header">
+      <h1>Settings</h1>
+    </header>
 
-<body>
-  <header class="header">
-    <h1>Settings</h1>
-  </header>
+    <main>
+      <section class="settings-section">
+        <h2>Extension Behavior</h2>
 
-  <main>
-    <section class="settings-section">
-      <h2>Extension Behavior</h2>
-
-      <div class="setting-item">
-        <div class="setting-info">
-          <div class="setting-title">
-            Automatically reload all tabs
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-title">Automatically reload all tabs</div>
+            <div class="setting-description">
+              Automatically reloads all tabs when a protection setting is
+              changed
+            </div>
           </div>
-          <div class="setting-description">
-            Automatically reloads all tabs when a protection setting is changed
+          <label class="switch">
+            <input type="checkbox" id="autoReloadAll" />
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-title">Reload active tab</div>
+            <div class="setting-description">
+              Reloads only the active tab when a setting is changed
+            </div>
           </div>
+          <label class="switch">
+            <input type="checkbox" id="autoReloadCurrent" />
+            <span class="slider"></span>
+          </label>
         </div>
-        <label class="switch">
-          <input type="checkbox" id="autoReloadAll" />
-          <span class="slider"></span>
-        </label>
-      </div>
+      </section>
 
-      <div class="setting-item">
-        <div class="setting-info">
-          <div class="setting-title">Reload active tab</div>
-          <div class="setting-description">
-            Reloads only the active tab when a setting is changed
+      <section class="settings-section">
+        <h2>Navigator Spoofing Configuration</h2>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-title">Platform</div>
+            <div class="setting-description">Simulated operating system</div>
           </div>
+          <select id="platform" class="select-input">
+            <option value="random">Random</option>
+            <option value="Windows NT 10.0">Windows 10</option>
+            <option value="Windows NT 11.0">Windows 11</option>
+            <option value="MacIntel">MacOS</option>
+            <option value="Linux x86_64">Linux</option>
+          </select>
         </div>
-        <label class="switch">
-          <input type="checkbox" id="autoReloadCurrent" />
-          <span class="slider"></span>
-        </label>
-      </div>
-    </section>
+        <!-- navigateur  -->
+        <!-- <div class="setting-item"> -->
+        <!--   <div class="setting-info"> -->
+        <!--     <div class="setting-title">Browser</div> -->
+        <!--     <div class="setting-description">Simulated browser</div> -->
+        <!--   </div> -->
+        <!--   <select id="navSpoofBrowser" class="select-input"> -->
+        <!--     <option value="random">Random</option> -->
+        <!--     <option value="Chrome">Chrome</option> -->
+        <!--     <option value="Firefox">Firefox</option> -->
+        <!--     <option value="Safari">Safari</option> -->
+        <!--     <option value="Opera">Opera</option> -->
+        <!--     <option value="Edge">Edge</option> -->
+        <!--   </select> -->
+        <!-- </div> -->
 
-    <section class="settings-section">
-      <h2>Navigator Spoofing Configuration</h2>
-
-      <div class="setting-item">
-        <div class="setting-info">
-          <div class="setting-title">Platform</div>
-          <div class="setting-description">Simulated operating system</div>
-        </div>
-        <select id="platform" class="select-input">
-          <option value="random">Random</option>
-          <option value="Windows NT 10.0">Windows 10</option>
-          <option value="Windows NT 11.0">Windows 11</option>
-          <option value="MacIntel">MacOS</option>
-          <option value="Linux x86_64">Linux</option>
-        </select>
-      </div>
-
-      <div class="setting-item">
-        <div class="setting-info">
-          <div class="setting-title">Browser Language</div>
-          <div class="setting-description">Simulated primary language</div>
-        </div>
-        <select id="language" class="select-input">
-          <option value="random">Random</option>
-          <option value="fr-FR">French (FR)</option>
-          <option value="en-US">English (US)</option>
-          <option value="en-GB">English (GB)</option>
-          <option value="es-ES">Spanish</option>
-          <option value="de-DE">German</option>
-        </select>
-      </div>
-
-      <div class="setting-item">
-        <div class="setting-info">
-          <div class="setting-title">Number of CPU Cores</div>
-          <div class="setting-description">
-            Simulated number of processor cores
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-title">Language</div>
+            <div class="setting-description">Simulated primary language</div>
           </div>
+          <select id="language" class="select-input">
+            <option value="random">Random</option>
+            <option value="fr-FR">French (FR)</option>
+            <option value="en-US">English (US)</option>
+            <option value="en-GB">English (GB)</option>
+            <option value="es-ES">Spanish</option>
+            <option value="de-DE">German</option>
+          </select>
         </div>
-        <input type="number" id="hardwareConcurrency" class="number-input" min="1" max="32" value="4" />
-      </div>
 
-      <div class="setting-item">
-        <div class="setting-info">
-          <div class="setting-title">RAM (GB)</div>
-          <div class="setting-description">
-            Simulated amount of RAM in gigabytes
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-title">Number of CPU Cores</div>
+            <div class="setting-description">
+              Simulated number of processor cores
+            </div>
           </div>
+          <input
+            type="number"
+            id="hardwareConcurrency"
+            class="number-input"
+            min="1"
+            max="32"
+            value="4"
+          />
         </div>
-        <input type="number" id="deviceMemory" class="number-input" min="1" max="32" value="8" />
-      </div>
 
-      <div class="setting-item">
-        <div class="setting-info">
-          <div class="setting-title">Browser Version</div>
-          <div class="setting-description">
-            Version range for simulation
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-title">RAM (GB)</div>
+            <div class="setting-description">
+              Simulated amount of RAM in gigabytes
+            </div>
           </div>
+          <input
+            type="number"
+            id="deviceMemory"
+            class="number-input"
+            min="1"
+            max="32"
+            value="8"
+          />
         </div>
-        <div class="version-inputs">
-          <input type="number" id="minVersion" class="number-input" min="100" max="120" value="110" />
-          <span>to</span>
-          <input type="number" id="maxVersion" class="number-input" min="100" max="120" value="120" />
-        </div>
-      </div>
-    </section>
 
-    <section class="settings-section">
-      <h2>User Agent Data Spoofing (JavaScript) Configuration</h2>
-
-      <div class="setting-item">
-        <div class="setting-info">
-          <div class="setting-title">Platform</div>
-          <div class="setting-description">Simulated operating system</div>
-        </div>
-        <select id="uaPlatform" class="select-input">
-          <option value="random">Random</option>
-          <option value="Linux">Linux</option>
-          <option value="Windows NT 10.0">Windows 10</option>
-          <option value="Windows NT 11.0">Windows 11</option>
-          <option value="MacIntel">MacOS</option>
-        </select>
-      </div>
-
-      <div class="setting-item">
-        <div class="setting-info">
-          <div class="setting-title">Platform Version</div>
-          <div class="setting-description">
-            Simulated operating system version
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-title">Browser Version in the user agent</div>
+            <div class="setting-description">Version range for simulation</div>
           </div>
-        </div>
-        <input type="text" value="random" id="uaPlatformVersion" class="text-input" placeholder="Ex: 10.0.19041" />
-      </div>
-
-      <div class="setting-item">
-        <div class="setting-info">
-          <div class="setting-title">Architecture</div>
-          <div class="setting-description">
-            Simulated processor architecture
-          </div>
-        </div>
-        <select id="uaArchitecture" class="select-input">
-          <option value="random">Random</option>
-          <option value="x86">x86</option>
-          <option value="x86_64">x86_64</option>
-        </select>
-      </div>
-
-      <div class="setting-item">
-        <div class="setting-info">
-          <div class="setting-title">Bitness</div>
-          <div class="setting-description">
-            Bitness of the simulated system (32 or 64 bits)
+          <div class="version-inputs">
+            <input
+              type="number"
+              id="minVersion"
+              class="number-input"
+              min="100"
+              max="120"
+              value="110"
+            />
+            <span>to</span>
+            <input
+              type="number"
+              id="maxVersion"
+              class="number-input"
+              min="100"
+              max="120"
+              value="120"
+            />
           </div>
         </div>
-        <select id="uaBitness" class="select-input">
-          <option value="random">Random</option>
-          <option value="32">32 bits</option>
-          <option value="64">64 bits</option>
-        </select>
-      </div>
+      </section>
 
-      <div class="setting-item">
-        <div class="setting-info">
-          <div class="setting-title">WOW64 Support</div>
-          <div class="setting-description">
-            Indicates whether WOW64 support is enabled
+      <section class="settings-section">
+        <h2>User Agent Data Spoofing (JavaScript) Configuration</h2>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-title">Platform</div>
+            <div class="setting-description">Simulated operating system</div>
+          </div>
+          <select id="uaPlatform" class="select-input">
+            <option value="random">Random</option>
+            <option value="Linux">Linux</option>
+            <option value="Windows NT 10.0">Windows 10</option>
+            <option value="Windows NT 11.0">Windows 11</option>
+            <option value="MacIntel">MacOS</option>
+          </select>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-title">Platform Version</div>
+            <div class="setting-description">
+              Simulated operating system version
+            </div>
+          </div>
+          <input
+            type="text"
+            value="random"
+            id="uaPlatformVersion"
+            class="text-input"
+            placeholder="Ex: 10.0.19041"
+          />
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-title">Architecture</div>
+            <div class="setting-description">
+              Simulated processor architecture
+            </div>
+          </div>
+          <select id="uaArchitecture" class="select-input">
+            <option value="random">Random</option>
+            <option value="x86">x86</option>
+            <option value="x86_64">x86_64</option>
+          </select>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-title">Bitness</div>
+            <div class="setting-description">
+              Bitness of the simulated system (32 or 64 bits)
+            </div>
+          </div>
+          <select id="uaBitness" class="select-input">
+            <option value="random">Random</option>
+            <option value="32">32 bits</option>
+            <option value="64">64 bits</option>
+          </select>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-title">WOW64 Support</div>
+            <div class="setting-description">
+              Indicates whether WOW64 support is enabled
+            </div>
+          </div>
+          <select id="uaWow64" class="select-input">
+            <option value="random">Random</option>
+            <option value="true">Yes</option>
+            <option value="false">No</option>
+          </select>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-title">Device Model</div>
+            <div class="setting-description">
+              Simulated device model (leave empty if unspecified)
+            </div>
+          </div>
+          <input
+            type="text"
+            id="uaModel"
+            class="text-input"
+            placeholder='Ex: "Model X"'
+          />
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-title">Full UA Version</div>
+            <div class="setting-description">
+              Simulated full user agent version (leave empty if unspecified)
+            </div>
+          </div>
+          <input
+            type="text"
+            id="uaFullVersion"
+            class="text-input"
+            placeholder='Ex: "120.0.0.0"'
+          />
+        </div>
+      </section>
+
+      <section class="settings-section">
+        <h2>User Agent Data Spoofing (Request Header) Configuration</h2>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-title">Browser</div>
+            <div class="setting-description">
+              Choose a browser or leave random
+            </div>
+          </div>
+          <select id="browser" class="select-input">
+            <option value="random">Random</option>
+            <option value="Chrome">Chrome</option>
+            <option value="Firefox">Firefox</option>
+            <option value="Safari">Safari</option>
+          </select>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-title">sec-ch-ua</div>
+            <div class="setting-description">Value for sec-ch-ua</div>
+          </div>
+          <select id="secChUa" class="select-input">
+            <option value="random">Random</option>
+            <option value='""'>Empty</option>
+            <option value='"Chromium";v="90"'>Chromium 90</option>
+            <option value='"Not A;Brand";v="99"'>Not A Brand 99</option>
+          </select>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-title">sec-ch-ua-mobile</div>
+            <div class="setting-description">
+              Indicates if the device is mobile
+            </div>
+          </div>
+          <select id="secChUaMobile" class="select-input">
+            <option value="random">Random</option>
+            <option value="?0">Not mobile</option>
+            <option value="?1">Mobile</option>
+          </select>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-title">sec-ch-ua-platform</div>
+            <div class="setting-description">User's platform</div>
+          </div>
+          <select id="secChUaPlatform" class="select-input">
+            <option value="random">Random</option>
+            <option value='""'>Empty</option>
+            <option value='"Windows"'>Windows</option>
+            <option value='"macOS"'>macOS</option>
+            <option value='"Linux"'>Linux</option>
+          </select>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-title">sec-ch-ua-full-version</div>
+            <div class="setting-description">Full UA version</div>
+          </div>
+          <input
+            type="text"
+            id="secChUaFullVersion"
+            class="text-input"
+            placeholder='Ex: "90.0.4430.85"'
+          />
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-title">sec-ch-ua-platform-version</div>
+            <div class="setting-description">User's platform version</div>
+          </div>
+          <input
+            type="text"
+            id="secChUaPlatformVersion"
+            class="text-input"
+            placeholder='Ex: "10.0.19041"'
+          />
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-title">Device Memory (GB)</div>
+            <div class="setting-description">
+              Simulated device memory (4, 8, 16, or 32)
+            </div>
+          </div>
+          <select id="hDeviceMemory" class="select-input">
+            <option value="random">Random</option>
+            <option value="4">4 GB</option>
+            <option value="8">8 GB</option>
+            <option value="16">16 GB</option>
+            <option value="32">32 GB</option>
+          </select>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-title">Content-Encoding</div>
+            <div class="setting-description">
+              Type of content encoding (gzip or deflate)
+            </div>
+          </div>
+          <select id="contentEncoding" class="select-input">
+            <option value="random">Random</option>
+            <option value="">Empty</option>
+            <option value="gzip">gzip</option>
+            <option value="deflate">deflate</option>
+          </select>
+        </div>
+      </section>
+
+      <button class="save-button" id="saveButton">Save all changes</button>
+      <div id="saveStatus"></div>
+
+      <section class="settings-section">
+        <h2>Profile Management</h2>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-title">Use Fixed Profile</div>
+            <div class="setting-description">
+              Use the same profile values instead of generating random values
+              each time
+            </div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" class="slider" id="useFixedProfile" />
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-title">Generate New Profile on Start</div>
+            <div class="setting-description">
+              Create a new random profile when browser starts (only works with
+              Fixed Profile enabled)
+            </div>
+          </div>
+          <label class="switch">
+            <input
+              type="checkbox"
+              class="slider"
+              id="generateNewProfileOnStart"
+            />
+            <span class="slider"></span>
+          </label>
+        </div>
+
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-title">Profiles</div>
+            <div class="setting-description">Select which profile to use</div>
+          </div>
+          <div class="profile-controls">
+            <select id="activeProfile" class="select-input profile-select">
+              <!-- Les options seront générées dynamiquement par JavaScript -->
+            </select>
+            <button id="activateProfile" class="profile-button">
+              Activate Profile
+            </button>
+            <button id="deleteProfile" class="profile-button">
+              Delete Profile
+            </button>
           </div>
         </div>
-        <select id="uaWow64" class="select-input">
-          <option value="random">Random</option>
-          <option value="true">Yes</option>
-          <option value="false">No</option>
-        </select>
-      </div>
+        <div class="profile-creation setting-item">
+          <p class="setting-title">
+            Create New Profile with the current settings
+          </p>
+          <!-- <input -->
+          <!--   type="text" -->
+          <!--   id="activateProfileName" -->
+          <!--   placeholder="Profile Name" -->
+          <!-- /> -->
+          <button id="newProfile" class="profile-button">
+            Create New Profile
+          </button>
+        </div>
 
-      <div class="setting-item">
-        <div class="setting-info">
-          <div class="setting-title">Device Model</div>
-          <div class="setting-description">
-            Simulated device model (leave empty if unspecified)
+        <div class="setting-item">
+          <div class="setting-info">
+            <div class="setting-title">Current Profile Details</div>
+            <div class="setting-description">
+              Information about the currently selected profile
+            </div>
+          </div>
+          <div class="profile-details">
+            <div id="profileInfo" class="profile-info">
+              <p>Created: <span id="profileCreated"></span></p>
+              <p>Platform: <span id="profilePlatform"></span></p>
+              <p>Language: <span id="profileLanguage"></span></p>
+              <p>Browser: <span id="profileBrowser"></span></p>
+              <p>Hardware: <span id="profileHardware"></span></p>
+            </div>
           </div>
         </div>
-        <input type="text" id="uaModel" class="text-input" placeholder='Ex: "Model X"' />
-      </div>
-
-      <div class="setting-item">
-        <div class="setting-info">
-          <div class="setting-title">Full UA Version</div>
-          <div class="setting-description">
-            Simulated full user agent version (leave empty if unspecified)
-          </div>
-        </div>
-        <input type="text" id="uaFullVersion" class="text-input" placeholder='Ex: "120.0.0.0"' />
-      </div>
-    </section>
-
-    <section class="settings-section">
-      <h2>User Agent Data Spoofing (Request Header) Configuration</h2>
-
-      <div class="setting-item">
-        <div class="setting-info">
-          <div class="setting-title">Browser</div>
-          <div class="setting-description">
-            Choose a browser or leave random
-          </div>
-        </div>
-        <select id="browser" class="select-input">
-          <option value="random">Random</option>
-          <option value="Chrome">Chrome</option>
-          <option value="Firefox">Firefox</option>
-          <option value="Safari">Safari</option>
-        </select>
-      </div>
-
-      <div class="setting-item">
-        <div class="setting-info">
-          <div class="setting-title">sec-ch-ua</div>
-          <div class="setting-description">Value for sec-ch-ua</div>
-        </div>
-        <select id="secChUa" class="select-input">
-          <option value="random">Random</option>
-          <option value='""'>Empty</option>
-          <option value='"Chromium";v="90"'>Chromium 90</option>
-          <option value='"Not A;Brand";v="99"'>Not A Brand 99</option>
-        </select>
-      </div>
-
-      <div class="setting-item">
-        <div class="setting-info">
-          <div class="setting-title">sec-ch-ua-mobile</div>
-          <div class="setting-description">
-            Indicates if the device is mobile
-          </div>
-        </div>
-        <select id="secChUaMobile" class="select-input">
-          <option value="random">Random</option>
-          <option value="?0">Not mobile</option>
-          <option value="?1">Mobile</option>
-        </select>
-      </div>
-
-      <div class="setting-item">
-        <div class="setting-info">
-          <div class="setting-title">sec-ch-ua-platform</div>
-          <div class="setting-description">User's platform</div>
-        </div>
-        <select id="secChUaPlatform" class="select-input">
-          <option value="random">Random</option>
-          <option value='""'>Empty</option>
-          <option value='"Windows"'>Windows</option>
-          <option value='"macOS"'>macOS</option>
-          <option value='"Linux"'>Linux</option>
-        </select>
-      </div>
-
-      <div class="setting-item">
-        <div class="setting-info">
-          <div class="setting-title">sec-ch-ua-full-version</div>
-          <div class="setting-description">Full UA version</div>
-        </div>
-        <input type="text" id="secChUaFullVersion" class="text-input" placeholder='Ex: "90.0.4430.85"' />
-      </div>
-
-      <div class="setting-item">
-        <div class="setting-info">
-          <div class="setting-title">sec-ch-ua-platform-version</div>
-          <div class="setting-description">
-            User's platform version
-          </div>
-        </div>
-        <input type="text" id="secChUaPlatformVersion" class="text-input" placeholder='Ex: "10.0.19041"' />
-      </div>
-
-      <div class="setting-item">
-        <div class="setting-info">
-          <div class="setting-title">Device Memory (GB)</div>
-          <div class="setting-description">
-            Simulated device memory (4, 8, 16, or 32)
-          </div>
-        </div>
-        <select id="hDeviceMemory" class="select-input">
-          <option value="random">Random</option>
-          <option value="4">4 GB</option>
-          <option value="8">8 GB</option>
-          <option value="16">16 GB</option>
-          <option value="32">32 GB</option>
-        </select>
-      </div>
-
-      <div class="setting-item">
-        <div class="setting-info">
-          <div class="setting-title">Content-Encoding</div>
-          <div class="setting-description">
-            Type of content encoding (gzip or deflate)
-          </div>
-        </div>
-        <select id="contentEncoding" class="select-input">
-          <option value="random">Random</option>
-          <option value="">Empty</option>
-          <option value="gzip">gzip</option>
-          <option value="deflate">deflate</option>
-        </select>
-      </div>
-    </section>
-
-    <button class="save-button" id="saveButton">
-      Save all changes
-    </button>
-    <div id="saveStatus"></div>
-  </main>
-  <script src="settings.js"></script>
-</body>
-
+      </section>
+    </main>
+    <script src="settings.js"></script>
+  </body>
 </html>
