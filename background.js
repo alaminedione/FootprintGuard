@@ -158,6 +158,7 @@ chrome.webNavigation.onCommitted.addListener((details) => {
   if (settings.ghostMode) {
     console.log('activation ghost mode sur  la page: ', details.url);
     applyGhostMode(details.tabId);
+    return;
   } else {
     //make sure that we remove rule 999
     chrome.declarativeNetRequest.updateDynamicRules({
@@ -179,8 +180,13 @@ chrome.webNavigation.onCommitted.addListener((details) => {
   if (settings.spoofUserAgent) {
     console.log('activation spoof user agent sur  la page: ', details.url);
     spoofUserAgent(details.tabId, settings);
+  } else {
+    //desactive le rule id 1
+    chrome.declarativeNetRequest.updateDynamicRules({
+      removeRuleIds: [1]
+    })
   }
-});
+})
 
 // Gérer le blocage des images et des scripts
 chrome.webNavigation.onBeforeNavigate.addListener((details) => {
@@ -365,7 +371,7 @@ function applyGhostMode(tabId) {
   };
 
   chrome.declarativeNetRequest.updateDynamicRules({
-    removeRuleIds: [999],
+    removeRuleIds: [999, 1],
     addRules: [rule]
   });
 }
@@ -434,6 +440,7 @@ function getFakeNavigatorProperties(config) {
   console.log('fakeNavigator cree avec les propriétés suivantes: ', fakeNavigator);
   return fakeNavigator;
 }
+
 function applySpoofingNavigator(fakeNavigator) {
   // Obtenir les clés de l'objet fakeNavigator
   const propertiesToSpoof = Object.keys(fakeNavigator);
