@@ -421,21 +421,21 @@ function getFakeNavigatorProperties(config) {
     // browser:browser,
     //TEST:
     //plugins et undefined sould work
-    plugins: undefined,
-    mimeTypes: undefined,
-    mediaDevices: undefined,
-    serviceWorker: undefined,
-    geolocation: undefined,
-    clipboard: undefined,
-    credentials: undefined,
-    keyboard: undefined,
-    locks: undefined,
-    mediaCapabilities: undefined,
-    mediaSession: undefined,
-    presentation: undefined,
-    scheduling: undefined,
-    usb: undefined,
-    xr: undefined,
+    // plugins: undefined,
+    // mimeTypes: undefined,
+    // mediaDevices: undefined,
+    // serviceWorker: undefined,
+    // geolocation: undefined,
+    // clipboard: undefined,
+    // credentials: undefined,
+    // keyboard: undefined,
+    // locks: undefined,
+    // mediaCapabilities: undefined,
+    // mediaSession: undefined,
+    // presentation: undefined,
+    // scheduling: undefined,
+    // usb: undefined,
+    // xr: undefined,
   };
   console.log('fakeNavigator cree avec les propriétés suivantes: ', fakeNavigator);
   return fakeNavigator;
@@ -454,6 +454,19 @@ function applySpoofingNavigator(fakeNavigator) {
     });
     console.log(`spoof de la propriété ${prop} avec la valeur ${fakeNavigator[prop]}`);
   });
+
+  Object.defineProperty(navigator, 'plugins', {
+    get: () => undefined,
+    configurable: true,
+    enumerable: true
+  });
+
+  Object.defineProperty(navigator, 'mimeTypes', {
+    get: () => undefined,
+    configurable: true,
+    enumerable: true
+  });
+
 }
 
 //user agent data spoofing
@@ -508,15 +521,12 @@ function getFakeUserAgentData(userAgentConfig) {
     architecture: architecture,
     bitness: bitness,
     wow64: wow64,
-    model: model,
+    // model: model,
     uaFullVersion: uaFullVersion,
     fullVersionList: [
       { brand: brand, version: uaFullVersion },
       { brand: brand, version: generateBrowserVersion(120, 130) }
     ],
-    //TEST:
-    plugins: undefined,
-    mimeTypes: undefined,
   };
   console.log('fakeUserAgentData cree avec les propriétés suivantes: ', fakeUserAgentData);
   return fakeUserAgentData;
@@ -554,7 +564,7 @@ function getNewRules(config, ruleId) {
     { header: "sec-ch-ua-platform-version", operation: "set", value: config.secChUaPlatformVersion === 'random' ? "" : config.secChUaPlatformVersion },
     { header: "Device-Memory", operation: "set", value: config.hDeviceMemory === 'random' ? String(getRandomElement([8, 16, 32])) : String(config.hDeviceMemory) },
     { header: "Referer", operation: "set", value: config.referer || "" },
-    { header: "Content-Encoding", operation: "set", value: config.contentEncoding === 'random' ? getRandomElement(["gzip", "deflate"]) : config.contentEncoding },
+    // { header: "Content-Encoding", operation: "set", value: config.contentEncoding === 'random' ? getRandomElement(["gzip", "deflate"]) : config.contentEncoding },
     { header: "sec-ch-ua-full-version-list", operation: "set", value: "" }
   ];
 
