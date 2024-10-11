@@ -36,9 +36,9 @@ const defaultSettings = {
   referer: '',
   contentEncoding: 'random',
   //
-  useFixedProfile: true,  // Si true, utilise un profil fixe au lieu de valeurs aléatoires
+  useFixedProfile: false,  // Si true, utilise un profil fixe au lieu de valeurs aléatoires
   activeProfileId: null,   // ID du profil actif
-  generateNewProfileOnStart: true, // Génère un nouveau profil au démarrage du navigateur
+  generateNewProfileOnStart: false, // Génère un nouveau profil au démarrage du navigateur
 
 };
 
@@ -51,23 +51,24 @@ let settings = { ...defaultSettings };
 
 // Initialisation
 async function initialize() {
-  const stored = await chrome.storage.sync.get(null);
+  const stored = await chrome.storage.sync.get(defaultSettings);
   settings = { ...defaultSettings, ...stored };
 
   // Charger les profils existants
   const storedProfiles = await chrome.storage.local.get('profiles');
   profiles = storedProfiles.profiles || {};
 
-  // Gérer le profil actif
+  //  gérer le profil actif
   if (settings.useFixedProfile) {
     if (settings.generateNewProfileOnStart) {
-      currentProfile = generateNewProfile();
-      settings.activeProfileId = currentProfile.id;
-      await saveProfile(currentProfile);
+      if (!currentProfile) {
+        currentProfile = generateNewProfile();
+        settings.activeProfileId = currentProfile.id;
+        await saveProfile(currentProfile);
+      }
     } else if (settings.activeProfileId) {
       currentProfile = profiles[settings.activeProfileId];
     }
-
     if (!currentProfile) {
       currentProfile = generateNewProfile();
       settings.activeProfileId = currentProfile.id;
@@ -116,8 +117,10 @@ chrome.storage.onChanged.addListener((changes) => {
     settings[key] = newValue;
     // Si on change de profil actif
     if (key === 'activeProfileId' && settings.useFixedProfile) {
-      currentProfile = profiles[newValue];
-      if (!currentProfile) {
+      const newProfileId = newValue;
+      if (profiles[newProfileId]) {
+        currentProfile = profiles[newProfileId];
+      } else {
         currentProfile = generateNewProfile();
         settings.activeProfileId = currentProfile.id;
         saveProfile(currentProfile);
@@ -153,6 +156,11 @@ chrome.webNavigation.onCommitted.addListener((details) => {
   if (settings.ghostMode) {
     console.log('activation ghost mode sur  la page: ', details.url);
     applyGhostMode(details.tabId);
+  } else {
+    //make sure that we remove rule 999
+    chrome.declarativeNetRequest.updateDynamicRules({
+      removeRuleIds: [999],
+    });
   }
 
 

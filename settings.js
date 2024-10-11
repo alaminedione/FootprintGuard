@@ -8,7 +8,6 @@ const defaultSettings = {
   deviceMemory: 0,
   minVersion: 0,
   maxVersion: 0,
-  //
   uaPlatform: 'random',
   uaPlatformVersion: 'random',
   uaArchitecture: 'random',
@@ -16,7 +15,6 @@ const defaultSettings = {
   uaWow64: 'random',
   uaModel: 'random',
   uaFullVersion: 'random',
-  //
   browser: 'random',
   secChUa: 'random',
   secChUaMobile: 'random',
@@ -25,18 +23,14 @@ const defaultSettings = {
   secChUaPlatformVersion: 'random',
   hDeviceMemory: 'random',
   contentEncoding: 'random',
-  //
-  // Nouveaux paramètres pour les profils
-  useFixedProfile: true,
-  generateNewProfileOnStart: true,
+  useFixedProfile: false,
+  generateNewProfileOnStart: false,
   activeProfileId: null
 };
 
 const navigatorFields = [
   'platform', 'language', 'hardwareConcurrency',
   'deviceMemory', 'minVersion', 'maxVersion',
-  //NOTE: browser it's not in this list
-  //'navSpoofBrowser'
 ];
 
 const uaFields = [
@@ -47,11 +41,8 @@ const browserHeaders = [
   'browser', 'secChUa', 'secChUaMobile', 'secChUaPlatform', 'secChUaFullVersion', 'secChUaPlatformVersion', 'hDeviceMemory', 'contentEncoding'
 ];
 
-// État des paramètres actuels
 let profiles = {};
 let currentProfile = null;
-
-// État des paramètres actuels
 let currentSettings = { ...defaultSettings };
 
 // Éléments du DOM
@@ -59,23 +50,42 @@ const autoReloadAllCheckbox = document.getElementById('autoReloadAll');
 const autoReloadCurrentCheckbox = document.getElementById('autoReloadCurrent');
 const saveButton = document.getElementById('saveButton');
 const saveStatus = document.getElementById('saveStatus');
-// Nouveaux éléments du DOM pour les profils
 const useFixedProfileCheckbox = document.getElementById('useFixedProfile');
 const generateNewProfileCheckbox = document.getElementById('generateNewProfileOnStart');
 const activeProfileSelect = document.getElementById('activeProfile');
 const newProfileButton = document.getElementById('newProfile');
 const deleteProfileButton = document.getElementById('deleteProfile');
 const profileInfoDiv = document.getElementById('profileInfo');
-
 const activateProfileName = document.getElementById('activateProfileName');
 const activateProfile = document.getElementById('activateProfile');
+
+
+// Activate profile
+// activateProfile.addEventListener('click', async () => {
+//   const profileId = activeProfileSelect.value;
+//   if (profileId) {
+//     await chrome.storage.local.set({ activeProfileId: profileId });
+//     updateProfilesInterface();
+//     showStatus('Profil activé', 'success');
+//   }
+// });
+
+// TEST:
 
 activateProfile.addEventListener('click', async () => {
   const profileId = activeProfileSelect.value;
   if (profileId) {
-    await chrome.storage.local.set({ activeProfileId: profileId });
-    updateProfilesInterface();
-    showStatus('Profil activé', 'success');
+    try {
+      await chrome.storage.local.set({ activeProfileId: profileId });
+      currentSettings.activeProfileId = profileId; // Met à jour les paramètres actifs
+      updateProfilesInterface(); // Met à jour l'interface des profils
+      showStatus('Profil activé', 'success');
+    } catch (error) {
+      console.error('Erreur lors de l\'activation du profil:', error);
+      showStatus('Erreur lors de l\'activation du profil', 'error');
+    }
+  } else {
+    showStatus('Aucun profil sélectionné', 'error');
   }
 });
 
@@ -87,8 +97,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Charger les profils
     const storedProfiles = await chrome.storage.local.get('profiles');
     profiles = storedProfiles.profiles || {};
-    updateInterface();
+    // Si aucun profil n'est trouvé, créer un nouveau profil si l'option est activée
+    if (currentSettings.useFixedProfile && Object.keys(profiles).length === 0 && currentSettings.generateNewProfileOnStart) {
+      await createNewProfile();
+    }
+
     updateProfilesInterface();
+
+    updateInterface();
   } catch (error) {
     console.error('Erreur lors du chargement des paramètres:', error);
     showStatus('Erreur lors du chargement des paramètres', 'error');
@@ -100,18 +116,15 @@ function updateInterface() {
   autoReloadAllCheckbox.checked = currentSettings.autoReloadAll;
   autoReloadCurrentCheckbox.checked = currentSettings.autoReloadCurrent;
 
-  // Affichage des paramètres du Navigator
   navigatorFields.forEach(field => {
     const element = document.getElementById(field);
     if (element) {
-      const value = currentSettings[field];
-      element.value = value;
+      element.value = currentSettings[field];
     } else {
       console.error(`Élément ${field} introuvable`);
     }
   });
 
-  // Affichage des paramètres du UserAgentData
   uaFields.forEach(field => {
     const element = document.getElementById(field);
     if (element) {
@@ -121,7 +134,6 @@ function updateInterface() {
     }
   });
 
-  // Afficher les paramètres browserHeaders
   browserHeaders.forEach(field => {
     const element = document.getElementById(field);
     if (element) {
@@ -142,7 +154,7 @@ function updateProfilesInterface() {
     activeProfileSelect.appendChild(option);
   });
 
-  if (currentSettings.activeProfileId) {
+  if (currentSettings.activeProfileId && profiles[currentSettings.activeProfileId]) {
     activeProfileSelect.value = currentSettings.activeProfileId;
     showProfileDetails(profiles[currentSettings.activeProfileId]);
   }
@@ -151,6 +163,9 @@ function updateProfilesInterface() {
   generateNewProfileCheckbox.checked = currentSettings.generateNewProfileOnStart;
   activeProfileSelect.disabled = !currentSettings.useFixedProfile;
   deleteProfileButton.disabled = !currentSettings.useFixedProfile;
+
+  const activeProfile = profiles[currentSettings.activeProfileId];
+  document.getElementById('activeProfileName').textContent = activeProfile ? `Profile ${activeProfile.id.slice(-4)}` : 'None';
 }
 
 // Afficher les détails du profil
@@ -171,11 +186,10 @@ function showProfileDetails(profile) {
 }
 
 async function deleteProfile() {
-
-  const profile = activeProfileSelect.value;
-  if (profile) {
-    delete profiles[profile];
-    await chrome.storage.local.set({ profiles }); // Sauvegarde les profils
+  const profileId = activeProfileSelect.value;
+  if (profileId) {
+    delete profiles[profileId];
+    await chrome.storage.local.set({ profiles });
     updateProfilesInterface();
     showStatus('Profil supprimé', 'success');
   }
@@ -186,7 +200,7 @@ async function createNewProfile() {
     const newProfile = await chrome.runtime.sendMessage({ type: 'generateNewProfile' });
     profiles[newProfile.id] = newProfile;
 
-    await chrome.storage.local.set({ profiles }); // Sauvegarde les profils
+    await chrome.storage.local.set({ profiles });
     updateProfilesInterface();
     showStatus('Nouveau profil créé', 'success');
   } catch (error) {
@@ -230,22 +244,19 @@ saveButton.addEventListener('click', async () => {
   const newSettings = {
     autoReloadAll: autoReloadAllCheckbox.checked,
     autoReloadCurrent: autoReloadCurrentCheckbox.checked,
-    //
     platform: document.getElementById('platform').value,
     language: document.getElementById('language').value,
-    hardwareConcurrency: parseInt(document.getElementById('hardwareConcurrency').value),
-    deviceMemory: parseInt(document.getElementById('deviceMemory').value),
-    minVersion: parseInt(document.getElementById('minVersion').value),
-    maxVersion: parseInt(document.getElementById('maxVersion').value),
-    //
-    uaPlatform: document.getElementById('uaPlatform').value === '' ? 'random' : document.getElementById('uaPlatform').value,
-    uaPlatformVersion: document.getElementById('uaPlatformVersion').value === '' ? 'random' : document.getElementById('uaPlatformVersion').value,
+    hardwareConcurrency: parseInt(document.getElementById('hardwareConcurrency').value) || 0,
+    deviceMemory: parseInt(document.getElementById('deviceMemory').value) || 0,
+    minVersion: parseInt(document.getElementById('minVersion').value) || 0,
+    maxVersion: parseInt(document.getElementById('maxVersion').value) || 0,
+    uaPlatform: document.getElementById('uaPlatform').value || 'random',
+    uaPlatformVersion: document.getElementById('uaPlatformVersion').value || 'random',
     uaArchitecture: document.getElementById('uaArchitecture').value,
     uaBitness: document.getElementById('uaBitness').value,
     uaWow64: document.getElementById('uaWow64').value,
-    uaModel: document.getElementById('uaModel').value === '' ? 'random' : document.getElementById('uaModel').value,
+    uaModel: document.getElementById('uaModel').value || 'random',
     uaFullVersion: document.getElementById('uaFullVersion').value,
-    //
     browser: document.getElementById('browser').value,
     hDeviceMemory: document.getElementById('hDeviceMemory').value,
     secChUa: document.getElementById('secChUa').value,
@@ -253,7 +264,6 @@ saveButton.addEventListener('click', async () => {
     secChUaPlatform: document.getElementById('secChUaPlatform').value,
     secChUaFullVersion: document.getElementById('secChUaFullVersion').value,
     contentEncoding: document.getElementById('contentEncoding').value,
-    //
     useFixedProfile: useFixedProfileCheckbox.checked,
     generateNewProfileOnStart: generateNewProfileCheckbox.checked,
     activeProfileId: currentSettings.activeProfileId
@@ -264,7 +274,6 @@ saveButton.addEventListener('click', async () => {
     currentSettings = { ...newSettings };
     showStatus('Paramètres enregistrés avec succès', 'success');
 
-    // Notification au background script
     await chrome.runtime.sendMessage({
       type: 'updateSetting',
       settings: newSettings
