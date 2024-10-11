@@ -88,7 +88,7 @@ function generateNewProfile() {
     createdAt: new Date().toISOString(),
     fakeNavigator: getFakeNavigatorProperties(settings),
     fakeUserAgentData: getFakeUserAgentData(settings),
-    fakeUserAgentWithRelatedProperties: generateUserAgent_with_relatated_properties(settings),
+    fakeUserAgent: getFakeUserAgent(settings),
     rules: getNewRules(settings, 1),
   };
 
@@ -114,12 +114,14 @@ function getConfigValue(key) {
 // Écoute des changements de paramètres
 chrome.storage.onChanged.addListener((changes) => {
   for (let [key, { newValue }] of Object.entries(changes)) {
+    //mettre a jour les valeurs de settings
     settings[key] = newValue;
     // Si on change de profil actif
     if (key === 'activeProfileId' && settings.useFixedProfile) {
       const newProfileId = newValue;
       if (profiles[newProfileId]) {
         currentProfile = profiles[newProfileId];
+        console.log(`activeProfileId: ${currentProfile.id}`);
       } else {
         currentProfile = generateNewProfile();
         settings.activeProfileId = currentProfile.id;
@@ -232,7 +234,7 @@ function spoofNavigator(tabId, config) {
 
   console.log('Usurpation de la navigation sur la page');
   injectScript(tabId, applySpoofingNavigator, fakeNavigator);
-  injectScript(tabId, applyUserAgentDataSpoofing, fakeUserAgentData);
+  injectScript(tabId, applyUserAgentData, fakeUserAgentData);
 }
 
 
@@ -247,8 +249,8 @@ function getFakeUserAgentDataFromProfile(profile) {
 function getRulesFromProfiles(profile) {
   return profile.rules
 }
-function getFakeUserAgentDataWithRelatedPropertiesFromProfile(profile) {
-  return profile.fakeUserAgentWithRelatedProperties
+function getFakeUserAgentFromProfile(profile) {
+  return profile.fakeUserAgent
 }
 
 function spoofUserAgent(tabId, config) {
@@ -260,14 +262,12 @@ function spoofUserAgent(tabId, config) {
   });
   console.log('injection de  l\'script de modification de user agent');
   if (!settings.spoofNavigator) {
-    const fakeUserAgentWithRelatedProperties = settings.useFixedProfile && currentProfile
-      ? getFakeUserAgentDataWithRelatedPropertiesFromProfile(currentProfile)
-      : generateUserAgent_with_relatated_properties(settings);
-    injectScript(tabId, applyUserAgent, fakeUserAgentWithRelatedProperties);
-    const fakeUserAgentData = settings.useFixedProfile && currentProfile
-      ? getFakeUserAgentDataWithRelatedPropertiesFromProfile(currentProfile)
-      : getFakeUserAgentData(settings);
-    injectScript(tabId, applyUserAgentDataSpoofing, fakeUserAgentData);
+    const fakeUserAgent = settings.useFixedProfile && currentProfile
+      ? getFakeUserAgentFromProfile(currentProfile)
+      : getFakeUserAgent(settings);
+    console.log('iniatilisation de l\'injection de script de modification de user agent  avec comme args : ', fakeUserAgent);
+    console.log('le profile actuel est : ', currentProfile);
+    injectScript(tabId, applyUserAgent, fakeUserAgent);
   }
 }
 
@@ -487,7 +487,7 @@ function getFakeUserAgentData(userAgentConfig) {
     ? generateBrowserVersion(120, 130)
     : userAgentConfig.uaFullVersion;
 
-  const brand = getRandomElement(brands);
+  const brand = settings.browser === 'random' ? getRandomElement(brands) : settings.browser;
 
   // Créer un objet userAgentData fictif
   const fakeUserAgentData = {
@@ -506,12 +506,15 @@ function getFakeUserAgentData(userAgentConfig) {
     fullVersionList: [
       { brand: brand, version: uaFullVersion },
       { brand: brand, version: generateBrowserVersion(120, 130) }
-    ]
+    ],
+    //TEST:
+    plugins: undefined,
+    mimeTypes: undefined,
   };
   console.log('fakeUserAgentData cree avec les propriétés suivantes: ', fakeUserAgentData);
   return fakeUserAgentData;
 }
-function applyUserAgentDataSpoofing(fakeUserAgentData) {
+function applyUserAgentData(fakeUserAgentData) {
   Object.defineProperty(navigator, 'userAgentData', {
     get: () => fakeUserAgentData,
     configurable: true,
@@ -559,7 +562,7 @@ function getNewRules(config, ruleId) {
   }];
 }
 //modify user agent
-function generateUserAgent_with_relatated_properties(config) {
+function getFakeUserAgent(config) {
   const minVersion = config.minVersion === 0 ? getRandomInRange(70, 100) : (config.minVersion || 70);
   const maxVersion = config.maxVersion === 0 ? getRandomInRange(120, 130) : (config.maxVersion || 120);
   const uaPlatform = config.uaPlatform === 'random' ? getRandomElement(["Linux", "Windows NT 10.0", "MacIntel", "Windows 11"]) : config.uaPlatform;
@@ -570,7 +573,7 @@ function generateUserAgent_with_relatated_properties(config) {
     platform: uaPlatform,
     appVersion: `5.0 (${uaPlatform} AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${browserVersion} Safari/537.36`
   };
-  console.log('fakeUserAgent_data_with_relatated_properties cree avec les propriétés suivantes: ', fakeUserAgent_data_with_relatated_properties);
+  console.log('fakeUserAgent cree avec les propriétés suivantes: ', fakeUserAgent_data_with_relatated_properties);
   return fakeUserAgent_data_with_relatated_properties;
 
 }
