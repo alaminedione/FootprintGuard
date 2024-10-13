@@ -2,3 +2,4 @@ node_modules/
 ignore/
 _metadata/
 TODO.md
+dist/
