@@ -1,17 +1,30 @@
-# Fingerprint Guard
+# 🌐 Fingerprint Guard 🚀
 
-Fingerprint Guard est une extension conçue pour protéger la vie privée des utilisateurs en usurpant certaines informations du navigateur . Elle vise à contrer les techniques de fingerprinting utilisées par les sites web pour suivre les utilisateurs.
+Bienvenue dans Fingerprint Guard ! Une extension qui protège ta vie privée en ligne en usurpant certaines informations de ton navigateur. 🕵️‍♂️✨
 
-## Fonctionnalités
+## À quoi ça sert ? 🤔
 
-- **Usurpation de l'Agent Utilisateur** : Modifie l'agent utilisateur pour masquer l'identité réelle du navigateur.
-- **Usurpation du Navigateur** : Modifie les propriétés du navigateur pour empêcher la collecte d'informations sur le système.
-- **Usurpation du Canvas** : Empêche la collecte d'informations via des éléments `<canvas>`.
-- **Blocage des Images et JavaScript** : Option de bloquer les images et le JavaScript sur toutes les pages.
+Tu en as marre d'être suivi partout sur le web ? 🥴 Fingerprint Guard est là pour t'aider ! Voici ce qu'elle peut faire :
 
-## Contribuer
+- **Usurpation de l'Agent Utilisateur** 🦸‍♀️ : Masque ton identité réelle en modifiant l'agent utilisateur.
+- **Usurpation du Navigateur** 🖥️ : Empêche la collecte d'infos sur ton système.
+- **Usurpation du Canvas** 🎨 : Bloque la collecte de données via des éléments `<canvas>`.
+- **Blocage des Images et JavaScript** 🚫 : Option de bloquer ces éléments sur toutes les pages.
+- **Mode Fantôme (Ghost Mode)** 👻 : Règle toutes les valeurs à `undefined` pour te rendre quasi invisible !
 
-Les contributions sont les bienvenues ! Voici quelques façons dont vous pouvez aider :
+## Interface Utilisateur 🎛️
 
-1. Signaler des bugs ou des problèmes.
-2. Proposer de nouvelles fonctionnalités.
+Gère tes propres profils et fixe des valeurs facilement ! 🌟
+
+- **Gestion des Profils** : Crée et modifie des profils personnalisés pour tes besoins.
+- **Personnalisation** : Ajuste les paramètres de fingerprinting comme bon te semble. 🎯
+- **Facilité d'Utilisation** : Une interface intuitive pour que tu puisses naviguer sans souci ! 🖱️
+
+## Contribuer 🤝
+
+Tu veux aider ? Voici comment :
+
+1. **Signale des bugs 🐛** : Trouvé un problème ? Fais-le nous savoir !
+2. **Propose des fonctionnalités ✨** : Des idées pour améliorer l'appli ? Partage-les !
+3. **Teste et donne ton avis 💬** : Essaie les nouvelles versions et fais-nous part de tes impressions.
+4. **Partage l'extension 📣** : Fais connaître Fingerprint Guard à tes amis !
