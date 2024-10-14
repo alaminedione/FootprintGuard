@@ -32,33 +32,50 @@ const defaultSettings = {
   secChUaPlatform: 'random',
   secChUaFullVersion: 'random',
   secChUaPlatformVersion: 'random',
-  hDeviceMemory: 'random',
+  hDeviceMemory: 0,
   referer: '',
   contentEncoding: 'random',
   //
-  useFixedProfile: false,  // Si true, utilise un profil fixe au lieu de valeurs aléatoires
-  activeProfileId: null,   // ID du profil actif
-  generateNewProfileOnStart: false, // Génère un nouveau profil au démarrage du navigateur
-
+  useFixedProfile: false,
+  activeProfileId: null,
+  generateNewProfileOnStart: false,
+  //
+  profiles: []
 };
 
 
 // Structure pour stocker les profils
-let profiles = {};
+let profiles = [];
 let currentProfile = null;
 
 let settings = { ...defaultSettings };
 
 // Initialisation
 async function initialize() {
-  const stored = await chrome.storage.sync.get(defaultSettings);
+  //charger les paramètres
+  const stored = await chrome.storage.sync.get(Object.keys(defaultSettings));
   settings = { ...defaultSettings, ...stored };
 
   // Charger les profils existants
   const storedProfiles = await chrome.storage.local.get('profiles');
-  profiles = storedProfiles.profiles || {};
+  profiles = storedProfiles.profiles || [];
 
-  //  gérer le profil actif
+  // Charger le profil actif
+  if (settings.activeProfileId) {
+    currentProfile = getProfileById(settings.activeProfileId);
+    if (!currentProfile) {
+      //le profil actif n'existe plus, peut etre qu'il a ete supprimé
+      currentProfile = null
+      settings.activeProfileId = null
+      chrome.storage.sync.set({ activeProfileId: null }, () => {
+        console.log('activeProfileId mis à null ', settings.activeProfileId);
+      });
+    }
+  } else {
+    currentProfile = null;
+  }
+
+  // Gérer le profil actif
   if (settings.useFixedProfile) {
     if (settings.generateNewProfileOnStart) {
       if (!currentProfile) {
@@ -67,7 +84,7 @@ async function initialize() {
         await saveProfile(currentProfile);
       }
     } else if (settings.activeProfileId) {
-      currentProfile = profiles[settings.activeProfileId];
+      currentProfile = getProfileById(settings.activeProfileId);
     }
     if (!currentProfile) {
       currentProfile = generateNewProfile();
@@ -80,7 +97,7 @@ async function initialize() {
   console.log('currentProfile loaded:', currentProfile);
 }
 
-initialize()
+initialize();
 
 function generateNewProfile() {
   const profile = {
@@ -98,10 +115,14 @@ function generateNewProfile() {
 
 // Sauvegarde d'un profil
 async function saveProfile(profile) {
-  profiles[profile.id] = profile;
+  profiles.push(profile);
   await chrome.storage.local.set({ profiles });
 }
 
+// Fonction pour obtenir un profil par ID
+function getProfileById(profileId) {
+  return profiles.find(profile => profile.id === profileId);
+}
 
 // Obtention des valeurs de configuration
 function getConfigValue(key) {
@@ -111,16 +132,19 @@ function getConfigValue(key) {
   return settings[key];
 }
 
+
 // Écoute des changements de paramètres
 chrome.storage.onChanged.addListener((changes) => {
   for (let [key, { newValue }] of Object.entries(changes)) {
-    //mettre a jour les valeurs de settings
+    // Mettre à jour les valeurs de settings
     settings[key] = newValue;
+
     // Si on change de profil actif
     if (key === 'activeProfileId' && settings.useFixedProfile) {
       const newProfileId = newValue;
-      if (profiles[newProfileId]) {
-        currentProfile = profiles[newProfileId];
+      currentProfile = getProfileById(newProfileId); // Utiliser la fonction pour obtenir le profil
+
+      if (currentProfile) {
         console.log(`activeProfileId: ${currentProfile.id}`);
       } else {
         currentProfile = generateNewProfile();
@@ -128,23 +152,86 @@ chrome.storage.onChanged.addListener((changes) => {
         saveProfile(currentProfile);
       }
     }
-    console.log(`parametres modifier: ${key} = ${newValue}`);
+
+    console.log(`paramètres modifiés: ${key} = ${newValue}`);
   }
   handleAutoReload();
 });
 
-// Écoute des messages envoyés
+
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-  if (message.type === 'getStatus') {
-    sendResponse(settings);
-    console.log('status envoye: ', settings);
-  } else if (message.type === 'updateSetting') {
-    chrome.storage.sync.set({ [message.setting]: message.value });
-    console.log(`parametre ${message.setting} mis à ${message.value}`);
-  } else if (message.type === 'generateNewProfile') {
-    const newProfile = generateNewProfile();
-    sendResponse(newProfile);
+  switch (message.type) {
+    case 'getStatus':
+      sendResponse(settings);
+      console.log('Status envoyé:', settings);
+      break;
+
+    case 'updateSetting': {
+      const { setting, value } = message;
+      settings[setting] = value;
+
+      chrome.storage.sync.set({ [setting]: value }, () => {
+        console.log(`Paramètre ${setting} mis à ${value}`);
+      });
+      sendResponse({ success: true });
+      break;
+    }
+
+    case 'updateSettings': {
+      const msg_settings = message.settings;
+      Object.keys(msg_settings).forEach(key => {
+        settings[key] = msg_settings[key];
+        chrome.storage.sync.set({ [key]: msg_settings[key] }, () => {
+          console.log(`Paramètre ${key} mis à ${msg_settings[key]}`);
+        });
+      });
+      sendResponse({ success: true });
+      break;
+    }
+
+    case 'generateNewProfile': {
+      const newProfile = generateNewProfile();
+      profiles.push(newProfile);
+      chrome.storage.local.set({ profiles }, () => {
+        console.log('Profil enregistré:', newProfile);
+      });
+      sendResponse(newProfile);
+      break;
+    }
+
+    case 'getProfiles':
+      sendResponse(profiles);
+      console.log('Profils envoyés:', profiles);
+      break;
+
+    case 'getActiveProfileId':
+      sendResponse(settings.activeProfileId);
+      console.log('ID du profil actif envoyé:', settings.activeProfileId);
+      break;
+
+    case 'deleteProfile': {
+      const profileIndex = profiles.findIndex(profile => profile.id === message.id);
+      if (profileIndex > -1) {
+        profiles.splice(profileIndex, 1);
+        chrome.storage.local.set({ profiles }, () => {
+          console.log('Profil supprimé:', message.id);
+        });
+        sendResponse({ success: true });
+      } else {
+        sendResponse({ success: false, error: 'Profil non trouvé' });
+      }
+      break;
+    }
+    case 'getSettings':
+      sendResponse(settings);
+      console.log('Settings envoyés:', settings);
+      break;
+
+    default:
+      console.warn('Type de message non reconnu:', message.type);
+      sendResponse({ success: false, error: 'Type de message non reconnu' });
   }
+  // return true; // Indicate that the response will be sent asynchronously
 });
 
 // Écoute les navigations et injecte les scripts
@@ -260,15 +347,16 @@ function getFakeUserAgentFromProfile(profile) {
 }
 
 function spoofUserAgent(tabId, config) {
-  const newRule = settings.useFixedProfile && currentProfile ? getRulesFromProfiles(currentProfile) : getNewRules(config, 1); // 1 est un ID de règle unique
+  const newRule = settings.activeProfileId && currentProfile ? getRulesFromProfiles(currentProfile) : getNewRules(config, 1); // 1 est un ID de règle unique
   console.log('usurpation de l\'user agent sur la page: ');
+  // const newRule = getNewRules(config, 1); // 1 est un ID de règle unique
   chrome.declarativeNetRequest.updateDynamicRules({
     removeRuleIds: [1],
-    addRules: newRule
+    addRules: newRule,
   });
   console.log('injection de  l\'script de modification de user agent');
   if (!settings.spoofNavigator) {
-    const fakeUserAgent = settings.useFixedProfile && currentProfile
+    const fakeUserAgent = settings.activeProfileId && currentProfile
       ? getFakeUserAgentFromProfile(currentProfile)
       : getFakeUserAgent(settings);
     console.log('iniatilisation de l\'injection de script de modification de user agent  avec comme args : ', fakeUserAgent);
@@ -541,7 +629,7 @@ function applyUserAgentData(fakeUserAgentData) {
 }
 // Génération des règles
 const browsersVersions = {
-  "Chrome": [120, 119, 118],
+  "Chrome": [129, 128, 127, 126],
   "Firefox": [126, 125, 124],
   "Safari": [17, 16, 15],
   "Opera": [90, 89, 88],
@@ -550,18 +638,21 @@ const browsersVersions = {
 
 function getNewRules(config, ruleId) {
   // Génération des en-têtes
+  const platform = config.uaPlatform === 'random' ? getRandomElement(["Linux", "Windows NT 10.0", "MacIntel", "Windows 11"]) : config.uaPlatform;
+
+  const userAgent = `Mozilla/5.0 (${platform}) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/${getRandomElement([129, 128, 127, 126])}.${getRandomInRange(0, 9)}.${getRandomInRange(0, 9)} Safari/537.36`;
   const headers = [
     {
       header: "User-Agent",
       operation: "set",
-      value: config.browser === 'random' ? generateUserAgent(getRandomElement(Object.keys(browsersVersions))) : generateUserAgent(config.browser)
+      value: userAgent
     },
     { header: "sec-ch-ua", operation: "set", value: config.secChUa === 'random' ? getRandomElement(["", "Chromium", "Not A;Brand"]) : config.secChUa },
     { header: "sec-ch-ua-mobile", operation: "set", value: config.secChUaMobile === 'random' ? "?0" : config.secChUaMobile },
     { header: "sec-ch-ua-platform", operation: "set", value: config.secChUaPlatform === 'random' ? '""' : config.secChUaPlatform },
     { header: "sec-ch-ua-full-version", operation: "set", value: config.secChUaFullVersion === 'random' ? "" : config.secChUaFullVersion },
     { header: "sec-ch-ua-platform-version", operation: "set", value: config.secChUaPlatformVersion === 'random' ? "" : config.secChUaPlatformVersion },
-    { header: "Device-Memory", operation: "set", value: config.hDeviceMemory === 'random' ? String(getRandomElement([8, 16, 32])) : String(config.hDeviceMemory) },
+    { header: "Device-Memory", operation: "set", value: config.hDeviceMemory === 0 ? String(getRandomElement([8, 16, 32])) : String(config.hDeviceMemory) },
     { header: "Referer", operation: "set", value: config.referer || "" },
     // { header: "Content-Encoding", operation: "set", value: config.contentEncoding === 'random' ? getRandomElement(["gzip", "deflate"]) : config.contentEncoding },
     { header: "sec-ch-ua-full-version-list", operation: "set", value: "" }

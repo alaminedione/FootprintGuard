@@ -418,7 +418,7 @@
             <div class="setting-description">Select which profile to use</div>
           </div>
           <div class="profile-controls">
-            <select id="activeProfile" class="select-input profile-select">
+            <select id="profiles" class="select-input profile-select">
               <!-- Les options seront générées dynamiquement par JavaScript -->
             </select>
             <button id="activateProfile" class="profile-button">
@@ -444,7 +444,9 @@
         </div>
 
         <div class="setting-item">
-          <p class="setting-title">Active Profile: <span id="activeProfileName"></span></p>
+          <p class="setting-title">
+            Active Profile: <span id="activeProfile"></span>
+          </p>
         </div>
 
         <div class="setting-item">

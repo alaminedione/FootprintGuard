@@ -25,7 +25,8 @@ const defaultSettings = {
   contentEncoding: 'random',
   useFixedProfile: false,
   generateNewProfileOnStart: false,
-  activeProfileId: null
+  activeProfileId: null,
+  profiles: []
 };
 
 const navigatorFields = [
@@ -41,208 +42,152 @@ const uaFields = [
 const browserHeaders = [
   'browser', 'secChUa', 'secChUaMobile',
   'secChUaPlatform', 'secChUaFullVersion',
-  'secChUaPlatformVersion',
-  'hDeviceMemory',
-  'contentEncoding'
+  'secChUaPlatformVersion', 'hDeviceMemory',
+  // 'contentEncoding'
 ];
 
-let profiles = {};
+let currentProfiles = []; // Stockage des profils sous forme de tableau
 let currentProfile = null;
-let currentSettings = { ...defaultSettings };
+let settings = { ...defaultSettings };
 
-// Éléments du DOM
+//charger les profiles stockés
+async function getProfilesFromStockage() {
+  const profiles = await chrome.runtime.sendMessage({ type: 'getProfiles' })
+  return profiles || []
+}
+async function getSettingFromStockage() {
+  const settings = chrome.runtime.sendMessage({ type: 'getSettings' })
+  return settings
+}
+
+async function getActiveProfileFromStockage() {
+  const activeProfileId = await chrome.runtime.sendMessage({ type: 'getActiveProfileId' });
+  return activeProfileId || null
+}
+
+
+// DOM Elements
 const autoReloadAllCheckbox = document.getElementById('autoReloadAll');
 const autoReloadCurrentCheckbox = document.getElementById('autoReloadCurrent');
 const saveButton = document.getElementById('saveButton');
 const saveStatus = document.getElementById('saveStatus');
+//
 const useFixedProfileCheckbox = document.getElementById('useFixedProfile');
 const generateNewProfileCheckbox = document.getElementById('generateNewProfileOnStart');
-const activeProfileSelect = document.getElementById('activeProfile');
-const newProfileButton = document.getElementById('newProfile');
-const deleteProfileButton = document.getElementById('deleteProfile');
-const profileInfoDiv = document.getElementById('profileInfo');
-const activateProfile = document.getElementById('activateProfile');
+const profiles = document.getElementById('profiles');
+const btnNewProfile = document.getElementById('newProfile');
+const btnDeleteProfile = document.getElementById('deleteProfile');
+const btnActivateProfile = document.getElementById('activateProfile');
+const activeProfile = document.getElementById('activeProfile');
 
-// Chargement des paramètres au démarrage
+//active profile info
+const profileCreated = document.getElementById('profileCreated');
+const profilePlatform = document.getElementById('profilePlatform');
+const profileLanguage = document.getElementById('profileLanguage');
+const profileBrowser = document.getElementById('profileBrowser');
+const profileHardware = document.getElementById('profileHardware');
+
+// Load settings on startup
 document.addEventListener('DOMContentLoaded', async () => {
   try {
-    const storedSettings = await chrome.storage.sync.get(Object.keys(defaultSettings));
-    currentSettings = { ...defaultSettings, ...storedSettings };
+    currentProfiles = await getProfilesFromStockage()
+    console.log('profiles chargés:', currentProfiles);
 
-    const storedProfiles = await chrome.storage.local.get('profiles');
-    profiles = storedProfiles.profiles || {};
+    //charger les paramètres
+    settings = await getSettingFromStockage();
+    console.log('settings chargés:', settings);
 
-    // Créer un nouveau profil si nécessaire
-    if (currentSettings.useFixedProfile && Object.keys(profiles).length === 0 && currentSettings.generateNewProfileOnStart) {
-      await createNewProfile();
-    }
-
-    updateProfilesInterface();
-    updateInterface();
-  } catch (error) {
-    console.error('Erreur lors du chargement des paramètres:', error);
-    showStatus('Erreur lors du chargement des paramètres', 'error');
-  }
-});
-
-// Mise à jour de l'interface utilisateur
-function updateInterface() {
-  autoReloadAllCheckbox.checked = currentSettings.autoReloadAll;
-  autoReloadCurrentCheckbox.checked = currentSettings.autoReloadCurrent;
-
-  const allFields = [...navigatorFields, ...uaFields, ...browserHeaders];
-  allFields.forEach(field => {
-    const element = document.getElementById(field);
-    if (element) {
-      element.value = currentSettings[field];
+    //charger le profile actif
+    settings.activeProfileId = await getActiveProfileFromStockage();
+    console.log('activeProfileId chargé :' + settings.activeProfileId);
+    if (settings.activeProfileId) {
+      currentProfile = getProfileById(settings.activeProfileId);
+      if (!currentProfile) {
+        //le profil actif n'existe plus
+        currentProfile = null
+        settings.activeProfileId = null
+        chrome.storage.sync.set({ activeProfileId: null }, () => {
+          console.log('activeProfileId mis à null');
+        });
+      }
+      console.log('profile actif chargé :' + currentProfile + 'avec id : ' + settings.activeProfileId);
     } else {
-      console.error(`Élément ${field} introuvable`);
+      currentProfile = null; // Profil non trouvé
+      console.log('aucun profile actif trouvé');
     }
-  });
-}
 
-// Mise à jour de l'interface des profils
-function updateProfilesInterface() {
-  activeProfileSelect.innerHTML = '';
-  Object.entries(profiles).forEach(([id, profile]) => {
-    const option = document.createElement('option');
-    option.value = id;
-    option.textContent = `Profil ${id.slice(-4)} - ${profile.fakeNavigator.platform}`;
-    activeProfileSelect.appendChild(option);
-  });
-
-  if (currentSettings.activeProfileId && profiles[currentSettings.activeProfileId]) {
-    activeProfileSelect.value = currentSettings.activeProfileId;
-    showProfileDetails(profiles[currentSettings.activeProfileId]);
-  }
-
-  useFixedProfileCheckbox.checked = currentSettings.useFixedProfile;
-  generateNewProfileCheckbox.checked = currentSettings.generateNewProfileOnStart;
-  activeProfileSelect.disabled = !currentSettings.useFixedProfile;
-  deleteProfileButton.disabled = !currentSettings.useFixedProfile;
-
-  const activeProfileNameText =
-    profiles[currentSettings.activeProfileId] ? `Profil ${profiles[currentSettings.activeProfileId].id.slice(-4)}` : 'Aucun';
-  document.getElementById('activeProfileName').textContent = activeProfileNameText;
-}
-
-// Afficher les détails du profil
-function showProfileDetails(profile) {
-  if (!profile) {
-    profileInfoDiv.style.display = 'none';
-    return;
-  }
-
-  document.getElementById('profileCreated').textContent = new Date(profile.createdAt).toLocaleString();
-  document.getElementById('profilePlatform').textContent = profile.fakeNavigator.platform;
-  document.getElementById('profileLanguage').textContent = profile.fakeNavigator.language;
-  document.getElementById('profileBrowser').textContent = profile.fakeUserAgentData.browserVersion;
-  document.getElementById('profileHardware').textContent =
-    `${profile.fakeNavigator.hardwareConcurrency} cores, ${profile.fakeNavigator.deviceMemory}GB RAM`;
-
-  profileInfoDiv.style.display = 'block';
-}
-
-async function deleteProfile() {
-  const profileId = activeProfileSelect.value;
-  if (profileId) {
-    delete profiles[profileId];
-    await chrome.storage.local.set({ profiles });
-    updateProfilesInterface();
-    showStatus('Profil supprimé', 'success');
-  }
-}
-
-async function createNewProfile() {
-  try {
-    const newProfile = await chrome.runtime.sendMessage({ type: 'generateNewProfile' });
-    profiles[newProfile.id] = newProfile;
-
-    await chrome.storage.local.set({ profiles });
-    updateProfilesInterface();
-    showStatus('Nouveau profil créé', 'success');
+    updateInterface();
+    showStatus('Settings loaded', 'success');
   } catch (error) {
-    console.error('Erreur lors de la création du profil:', error);
-    showStatus('Erreur lors de la création du profil', 'error');
-  }
-}
-
-// Gestionnaires d'événements pour les nouveaux contrôles
-useFixedProfileCheckbox.addEventListener('change', async (e) => {
-  currentSettings.useFixedProfile = e.target.checked;
-  await chrome.storage.sync.set({ useFixedProfile: e.target.checked });
-
-  if (e.target.checked && Object.keys(profiles).length === 0) {
-    await createNewProfile();
-  }
-
-  updateProfilesInterface();
-});
-
-generateNewProfileCheckbox.addEventListener('change', async (e) => {
-  currentSettings.generateNewProfileOnStart = e.target.checked;
-  await chrome.storage.sync.set({ generateNewProfileOnStart: e.target.checked });
-});
-
-// Gestion des événements de changement de valeur des switches
-autoReloadAllCheckbox.addEventListener('change', (e) => {
-  if (e.target.checked && autoReloadCurrentCheckbox.checked) {
-    autoReloadCurrentCheckbox.checked = false;
+    console.error('Error loading settings:', error);
+    showStatus('Error loading settings', 'error');
   }
 });
 
-autoReloadCurrentCheckbox.addEventListener('change', (e) => {
-  if (e.target.checked && autoReloadAllCheckbox.checked) {
-    autoReloadAllCheckbox.checked = false;
-  }
-});
-
-// Enregistrement des paramètres
+//enregistrer les paramètres settings
 saveButton.addEventListener('click', async () => {
-  const newSettings = {
+  const settingsToUpdate = getSettingsFromUI();
+  console.log('settings to update : ', settingsToUpdate);
+  const result = chrome.runtime.sendMessage({ type: 'updateSettings', settings: settingsToUpdate });
+  console.log('result  de la sauvegarde : ', result);
+  settings = { ...settingsToUpdate }
+  if (result) {
+    showStatus('Settings saved', 'success');
+  } else {
+    showStatus('Error saving settings', 'error');
+  }
+})
+
+//ecouteurs d'evenements
+btnNewProfile.addEventListener('click', createNewProfile);
+btnDeleteProfile.addEventListener('click', deleteProfile);
+btnActivateProfile.addEventListener('click', activateProfile);
+
+//fonctions get all settings from ui
+function getSettingsFromUI() {
+  const settings = {
     autoReloadAll: autoReloadAllCheckbox.checked,
     autoReloadCurrent: autoReloadCurrentCheckbox.checked,
-    platform: document.getElementById('platform').value,
-    language: document.getElementById('language').value,
-    hardwareConcurrency: parseInt(document.getElementById('hardwareConcurrency').value) || 0,
-    deviceMemory: parseInt(document.getElementById('deviceMemory').value) || 0,
-    minVersion: parseInt(document.getElementById('minVersion').value) || 0,
-    maxVersion: parseInt(document.getElementById('maxVersion').value) || 0,
-    uaPlatform: document.getElementById('uaPlatform').value || 'random',
-    uaPlatformVersion: document.getElementById('uaPlatformVersion').value || 'random',
-    uaArchitecture: document.getElementById('uaArchitecture').value,
-    uaBitness: document.getElementById('uaBitness').value,
-    uaWow64: document.getElementById('uaWow64').value,
-    uaModel: document.getElementById('uaModel').value || 'random',
-    uaFullVersion: document.getElementById('uaFullVersion').value,
-    browser: document.getElementById('browser').value,
-    hDeviceMemory: document.getElementById('hDeviceMemory').value,
-    secChUa: document.getElementById('secChUa').value,
-    secChUaMobile: document.getElementById('secChUaMobile').value,
-    secChUaPlatform: document.getElementById('secChUaPlatform').value,
-    secChUaFullVersion: document.getElementById('secChUaFullVersion').value,
-    contentEncoding: document.getElementById('contentEncoding').value,
     useFixedProfile: useFixedProfileCheckbox.checked,
     generateNewProfileOnStart: generateNewProfileCheckbox.checked,
-    activeProfileId: currentSettings.activeProfileId
+    activeProfileId: currentProfile ? currentProfile.id : null,
+    platform: platform.value === '' ? 'random' : platform.value,
+    language: language.value === '' ? 'random' : language.value,
+    hardwareConcurrency: hardwareConcurrency.value === '' ? 0 : parseInt(hardwareConcurrency.value, 10), // Parse as int
+    deviceMemory: deviceMemory.value === '' ? 0 : parseInt(deviceMemory.value, 10), // Parse as int
+    minVersion: minVersion.value === '' ? 0 : parseInt(minVersion.value, 10), // Parse as int
+    maxVersion: maxVersion.value === '' ? 0 : parseInt(maxVersion.value, 10), // Parse as int
+    uaPlatform: uaPlatform.value === '' ? 'random' : uaPlatform.value,
+    uaPlatformVersion: uaPlatformVersion.value === '' ? 'random' : uaPlatformVersion.value,
+    uaArchitecture: uaArchitecture.value === '' ? 'random' : uaArchitecture.value,
+    uaBitness: uaBitness.value === '' ? 'random' : uaBitness.value,
+    uaWow64: uaWow64.value === '' ? 'random' : uaWow64.value,
+    uaModel: uaModel.value === '' ? 'random' : uaModel.value,
+    uaFullVersion: uaFullVersion.value === '' ? 'random' : uaFullVersion.value,
+    browser: browser.value === '' ? 'random' : browser.value,
+    secChUa: secChUa.value === '' ? 'random' : secChUa.value,
+    secChUaMobile: secChUaMobile.value === '' ? 'random' : secChUaMobile.value,
+    secChUaPlatform: secChUaPlatform.value === '' ? 'random' : secChUaPlatform.value,
+    secChUaFullVersion: secChUaFullVersion.value === '' ? 'random' : secChUaFullVersion.value,
+    secChUaPlatformVersion: secChUaPlatformVersion.value === '' ? 'random' : secChUaPlatformVersion.value,
+    hDeviceMemory: hDeviceMemory.value === '' ? 0 : parseInt(hDeviceMemory.value, 10), // Parse as int
+    // contentEncoding: contentEncoding.value === '' ? 'random' : contentEncoding.value,
+    profiles: currentProfiles || []
   };
 
-  try {
-    await chrome.storage.sync.set(newSettings);
-    currentSettings = { ...newSettings };
-    showStatus('Paramètres enregistrés avec succès', 'success');
-
-    await chrome.runtime.sendMessage({
-      type: 'updateSetting',
-      settings: newSettings
-    });
-  } catch (error) {
-    console.error("Erreur lors de l'enregistrement des paramètres:", error);
-    showStatus("Erreur lors de l'enregistrement des paramètres", "error");
+  return settings;
+}
+// Utilitaire pour obtenir un profil par ID
+function getProfileById(profileId) {
+  if (profileId) {
+    if (currentProfiles.length > 0) {
+      return currentProfiles.find(profile => profile.id === profileId);
+    } else {
+      return null;
+    }
   }
-});
+}
 
-// Affichage du statut
 function showStatus(message, type) {
   saveStatus.textContent = message;
   saveStatus.className = type;
@@ -253,24 +198,80 @@ function showStatus(message, type) {
   }, 3000);
 }
 
-// Gestionnaires d'événements pour les boutons de profil
-newProfileButton.addEventListener("click", createNewProfile);
-deleteProfileButton.addEventListener("click", deleteProfile);
+function updateInterface() {
+  autoReloadAllCheckbox.checked = settings.autoReloadAll;
+  autoReloadCurrentCheckbox.checked = settings.autoReloadCurrent;
 
-// Activation du profil sélectionné
-activateProfile.addEventListener("click", async () => {
-  const profileId = activeProfileSelect.value;
-  if (profileId) {
-    try {
-      await chrome.storage.local.set({ activeProfileId: profileId });
-      currentSettings.activeProfileId = profileId; // Met à jour les paramètres actifs
-      updateProfilesInterface(); // Met à jour l'interface des profils
-      showStatus("Profil activé", "success");
-    } catch (error) {
-      console.error("Erreur lors de l'activation du profil:", error);
-      showStatus("Erreur lors de l'activation du profil", "error");
+  const allFields = [...navigatorFields, ...uaFields, ...browserHeaders];
+  allFields.forEach(field => {
+    const element = document.getElementById(field);
+    const value = settings[field] !== undefined ? settings[field] : defaultSettings[field];
+    // const value = settings[field];
+    if (element) {
+      element.value = value;
+      console.log('Element updated in interface:', element);
+    } else {
+      console.error(`Element ${field} not found`);
     }
+  });
+  // Update section profiles
+  useFixedProfileCheckbox.checked = settings.useFixedProfile;
+  generateNewProfileCheckbox.checked = settings.generateNewProfileOnStart;
+  profiles.innerHTML = '';
+  if (currentProfiles.length > 0) {
+    currentProfiles.forEach(profile => {
+      const option = document.createElement('option');
+      option.value = profile.id;
+      option.textContent = `Profile ${profile.id.slice(-4)} - ${profile.fakeNavigator.platform}`;
+      profiles.appendChild(option);
+    });
   } else {
-    showStatus("Aucun profil sélectionné", "error");
+    profiles.appendChild(document.createTextNode('No profiles'));
   }
-});
+
+  //
+  activeProfile.textContent = currentProfile ? `Profile ${currentProfile.id.slice(-4)} - ${currentProfile.fakeNavigator.platform}` : 'No profile activated';
+
+  // Update section profile details
+  profileCreated.textContent = currentProfile ? currentProfile.createdAt : ''
+  profilePlatform.textContent = currentProfile ? currentProfile.fakeNavigator.platform : ''
+  profileLanguage.textContent = currentProfile ? currentProfile.fakeNavigator.language : ''
+  profileBrowser.textContent = currentProfile ? currentProfile.fakeNavigator.browser : ''
+  profileHardware.textContent = currentProfile ? currentProfile.fakeNavigator.hardwareConcurrency : ''
+}
+
+
+//create new profile
+async function createNewProfile() {
+  const newProfile = await chrome.runtime.sendMessage({ type: 'generateNewProfile' });
+  currentProfiles.push(newProfile);
+  updateInterface();
+  showStatus('New profile created', 'success');
+}
+//delete profile
+async function deleteProfile() {
+  const selectedProfile = profiles.value
+  const result = await chrome.runtime.sendMessage({ type: 'deleteProfile', id: selectedProfile });
+  if (result) {
+    currentProfiles.splice(currentProfiles.findIndex(profile => profile.id === selectedProfile), 1);
+    updateInterface();
+    showStatus('Profile deleted', 'success');
+  }
+}
+//activate profile
+async function activateProfile() {
+  const selctedProfileID = profiles.value
+  console.log('selctedProfileID : ', selctedProfileID);
+  const selectedProfile = getProfileById(selctedProfileID);
+  console.log('selected Profile : ', selectedProfile);
+  if (selectedProfile) {
+    currentProfile = { ...selectedProfile };
+    settings.activeProfileId = selctedProfileID;
+    console.log('active profile id mis a: ', settings.activeProfileId);
+    await chrome.runtime.sendMessage({ type: 'updateSetting', setting: 'activeProfileId', value: selctedProfileID });
+    console.log('current profile modified succesfully : ', currentProfile);
+    updateInterface();
+    showStatus('Profile activated', 'success');
+  }
+}
+
