@@ -1,4 +1,4 @@
-# 🌐 Fingerprint Guard 🚀
+# Fingerprint Guard
 
 Bienvenue dans Fingerprint Guard ! Une extension qui protège ta vie privée en ligne en usurpant certaines informations de ton navigateur. 🕵️‍♂️✨
 
@@ -19,6 +19,24 @@ Gère tes propres profils et fixe des valeurs facilement ! 🌟
 - **Gestion des Profils** : Crée et modifie des profils personnalisés pour tes besoins.
 - **Personnalisation** : Ajuste les paramètres de fingerprinting comme bon te semble. 🎯
 - **Facilité d'Utilisation** : Une interface intuitive pour que tu puisses naviguer sans souci ! 🖱️
+
+## Installation 📦
+
+Voici comment installer Fingerprint Guard sur les navigateurs basés sur Chromium (comme Google Chrome, Microsoft Edge, et Brave) :
+
+1. **Télécharge l'extension** : Rends-toi sur le site officiel de Fingerprint Guard pour télécharger le fichier de l'extension (au format .crx ou .zip).
+
+2. **Ouvre ton navigateur** : Lance le navigateur de ton choix basé sur Chromium (comme Google Chrome, Vivaldi , Microsoft Edge, et Brave).
+
+3. **Accède à la page des extensions** .
+4. **Active le mode développeur** : Dans le coin supérieur droit, active le "Mode développeur" en basculant l'interrupteur.
+
+5. **Installe l'extension** :
+
+   - Si tu as téléchargé un fichier .crx : Fais glisser le fichier directement dans la page des extensions.
+   - Si tu as un fichier .zip : Décompresse-le, puis clique sur "Charger l'extension non empaquetée" et sélectionne le dossier décompressé.
+
+6. **Configure tes paramètres** : Une fois installée, clique sur l'icône de Fingerprint Guard dans la barre d'outils pour accéder aux paramètres et personnaliser ton expérience !
 
 ## Contribuer 🤝
 
