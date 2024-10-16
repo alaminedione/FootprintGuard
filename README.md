@@ -24,7 +24,7 @@ Gère tes propres profils et fixe des valeurs facilement ! 🌟
 
 Voici comment installer Fingerprint Guard sur les navigateurs basés sur Chromium (comme Google Chrome, Microsoft Edge, et Brave) :
 
-1. **Télécharge l'extension** : Rends-toi sur le site officiel de Fingerprint Guard pour télécharger le fichier de l'extension (au format .crx ou .zip).
+1. **Télécharge l'extension** : télécharger le fichier de l'extension (format.crx) sur la section "Releases" de GitHub ou bien télécharger le fichier .zip directement.
 
 2. **Ouvre ton navigateur** : Lance le navigateur de ton choix basé sur Chromium (comme Google Chrome, Vivaldi , Microsoft Edge, et Brave).
 
