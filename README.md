@@ -38,6 +38,16 @@ Voici comment installer Fingerprint Guard sur les navigateurs basés sur Chromiu
 
 6. **Configure tes paramètres** : Une fois installée, clique sur l'icône de Fingerprint Guard dans la barre d'outils pour accéder aux paramètres et personnaliser ton expérience !
 
+## Tester 🧪
+
+Vérifie l'efficacité de Fingerprint Guard sur ces sites :
+
+1. **What Is My Browser** : [whatismybrowser.com](https://www.whatismybrowser.com)
+2. **BrowserLeaks** : [browserleaks.com](https://browserleaks.com)
+3. **Cover Your Tracks** : [coveryourtracks.eff.org](https://coveryourtracks.eff.org)
+
+Noter que **Ghost Mode** peut casser certains sites si vous l'activer.
+
 ## Contribuer 🤝
 
 Tu veux aider ? Voici comment :
