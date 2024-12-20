@@ -48,11 +48,3 @@ Vérifie l'efficacité de Fingerprint Guard sur ces sites :
 
 Noter que **Ghost Mode** peut casser certains sites si vous l'activer.
 
-## Contribuer 🤝
-
-Tu veux aider ? Voici comment :
-
-1. **Signale des bugs 🐛** : Trouvé un problème ? Fais-le nous savoir !
-2. **Propose des fonctionnalités ✨** : Des idées pour améliorer l'appli ? Partage-les !
-3. **Teste et donne ton avis 💬** : Essaie les nouvelles versions et fais-nous part de tes impressions.
-4. **Partage l'extension 📣** : Fais connaître Fingerprint Guard à tes amis !
