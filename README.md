@@ -1,6 +1,6 @@
 # Fingerprint Guard
 
-Cette est une extension vous protège contre le fingerprinting.
+Cette extension vous protège contre le fingerprinting.
 
 ## Tester 🧪
 
