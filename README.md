@@ -51,4 +51,5 @@ Noter que **Ghost Mode** peut casser certains sites si vous l'activer.
 ## Screenshots 📸
 
 ![Fingerprint Guard](./FingerprintGuard.png)
+<br>
 ![Ghost Mode](./ghostMode.png)
