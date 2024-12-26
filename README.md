@@ -48,3 +48,7 @@ Vérifie l'efficacité de Fingerprint Guard sur ces sites :
 
 Noter que **Ghost Mode** peut casser certains sites si vous l'activer.
 
+## Screenshots 📸
+
+![Fingerprint Guard](./FingerprintGuard.png)
+![Ghost Mode](./ghostMode.png)
